@@ -22,9 +22,7 @@ import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.FloatArrayLogEntry;
 import edu.wpi.first.util.datalog.IntegerArrayLogEntry;
 import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /** Provide access to the network communication data to / from the Driver Station. */
@@ -446,6 +444,52 @@ public final class DriverStation {
   }
 
   /**
+   * Generates a full stack trace message for the provided Throwable. Message is comparable to the
+   * output of {@link Throwable#printStackTrace()}.
+   *
+   * @param throwable Throwable to generate message for
+   * @return Messsage
+   */
+  private static String getFullStackTraceString(Throwable throwable) {
+    Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+    visited.add(throwable);
+
+    StringBuilder message = new StringBuilder();
+    message.append(throwable.toString() + "\n");
+    for (StackTraceElement element : throwable.getStackTrace()) {
+      message.append("\tat " + element.toString() + "\n");
+    }
+
+    StackTraceElement[] previousTrace = throwable.getStackTrace();
+    while ((throwable = throwable.getCause()) != null) {
+      if (visited.contains(throwable)) {
+        message.append("CIRCULAR REFERENCE: " + throwable + "]");
+        break;
+      } else {
+        visited.add(throwable);
+        var trace = throwable.getStackTrace();
+        int m = trace.length - 1;
+        int n = previousTrace.length - 1;
+        while (m >= 0 && n >= 0 && trace[m].equals(previousTrace[n])) {
+          m--;
+          n--;
+        }
+        int framesInCommon = trace.length - 1 - m;
+
+        message.append(throwable.toString() + "\n");
+        for (int i = 0; i <= m; i++) {
+          message.append("\tat " + trace[i] + "\n");
+        }
+        if (framesInCommon > 0) {
+          message.append("\t... " + framesInCommon + " more\n");
+        }
+        previousTrace = trace;
+      }
+    }
+    return message.toString();
+  }
+
+  /**
    * Report error to Driver Station. Optionally appends Stack trace to error message.
    *
    * @param error The error to report.
@@ -463,6 +507,10 @@ public final class DriverStation {
    */
   public static void reportError(String error, StackTraceElement[] stackTrace) {
     reportErrorImpl(true, 1, error, stackTrace);
+  }
+
+  public static void reportError(String error, Throwable throwable) {
+    reportErrorImpl(true, 1, error + "\n" + getFullStackTraceString(throwable), false);
   }
 
   /**
