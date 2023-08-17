@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.TimedRobot;
 
 public class MyRobot extends TimedRobot {
+  private final AprilTagFieldLayout layout =
+      AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.

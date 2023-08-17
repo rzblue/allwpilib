@@ -202,6 +202,9 @@ public class AprilTagFieldLayout {
     try (InputStream stream = AprilTagFieldLayout.class.getResourceAsStream(resourcePath);
         InputStreamReader reader = new InputStreamReader(stream)) {
       return new ObjectMapper().readerFor(AprilTagFieldLayout.class).readValue(reader);
+    } catch (NullPointerException e) {
+      // Class.getResourceAsStream() returns null if the resource does not exist.
+      throw new IOException("Could not locate resource: " + resourcePath, e);
     }
   }
 

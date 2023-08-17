@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include <frc/TimedRobot.h>
+#include <frc/apriltag/AprilTag.h>
 
 class MyRobot : public frc::TimedRobot {
   /**
