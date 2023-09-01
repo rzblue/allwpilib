@@ -22,13 +22,15 @@ import edu.wpi.first.util.sendable.SendableRegistry;
  *
  * <p>This class is provided by the NewCommands VendorDep
  */
-public abstract class Subsystem implements Sendable {
+public abstract class Subsystem implements Sendable, CommandMutex {
   /** Constructor. */
   public Subsystem() {
     String name = this.getClass().getSimpleName();
     name = name.substring(name.lastIndexOf('.') + 1);
     SendableRegistry.addLW(this, name, name);
     CommandScheduler.getInstance().registerSubsystem(this);
+    CommandScheduler.getInstance().addPeriodic(this::periodic);
+    CommandScheduler.getInstance().addSimPeriodic(this::simulationPeriodic);
   }
 
   /**

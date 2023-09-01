@@ -79,7 +79,7 @@ public abstract class WrapperCommand extends Command {
    * @return the set of subsystems that are required
    */
   @Override
-  public Set<Subsystem> getRequirements() {
+  public Set<CommandMutex> getRequirements() {
     return m_command.getRequirements();
   }
 

@@ -25,7 +25,7 @@ import java.util.function.BooleanSupplier;
  * <p>This class is provided by the NewCommands VendorDep
  */
 public abstract class Command implements Sendable {
-  protected Set<Subsystem> m_requirements = new HashSet<>();
+  protected Set<CommandMutex> m_requirements = new HashSet<>();
 
   protected Command() {
     String name = getClass().getName();
@@ -71,7 +71,7 @@ public abstract class Command implements Sendable {
    * @return the set of subsystems that are required
    * @see InterruptionBehavior
    */
-  public Set<Subsystem> getRequirements() {
+  public Set<CommandMutex> getRequirements() {
     return m_requirements;
   }
 
@@ -84,8 +84,8 @@ public abstract class Command implements Sendable {
    *
    * @param requirements the requirements to add
    */
-  public final void addRequirements(Subsystem... requirements) {
-    for (Subsystem requirement : requirements) {
+  public final void addRequirements(CommandMutex... requirements) {
+    for (CommandMutex requirement : requirements) {
       m_requirements.add(requireNonNullParam(requirement, "requirement", "addRequirements"));
     }
   }
@@ -195,7 +195,7 @@ public abstract class Command implements Sendable {
    * @param requirements the required subsystems
    * @return the decorated command
    */
-  public SequentialCommandGroup beforeStarting(Runnable toRun, Subsystem... requirements) {
+  public SequentialCommandGroup beforeStarting(Runnable toRun, CommandMutex... requirements) {
     return beforeStarting(new InstantCommand(toRun, requirements));
   }
 
@@ -228,7 +228,7 @@ public abstract class Command implements Sendable {
    * @param requirements the required subsystems
    * @return the decorated command
    */
-  public SequentialCommandGroup andThen(Runnable toRun, Subsystem... requirements) {
+  public SequentialCommandGroup andThen(Runnable toRun, CommandMutex... requirements) {
     return andThen(new InstantCommand(toRun, requirements));
   }
 
@@ -471,7 +471,7 @@ public abstract class Command implements Sendable {
    * @param requirement the subsystem to inquire about
    * @return whether the subsystem is required
    */
-  public boolean hasRequirement(Subsystem requirement) {
+  public boolean hasRequirement(CommandMutex requirement) {
     return getRequirements().contains(requirement);
   }
 

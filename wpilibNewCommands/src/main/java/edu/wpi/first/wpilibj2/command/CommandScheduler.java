@@ -64,11 +64,14 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
 
   // A map from required subsystems to their requiring commands. Also used as a set of the
   // currently-required subsystems.
-  private final Map<Subsystem, Command> m_requirements = new LinkedHashMap<>();
+  private final Map<CommandMutex, Command> m_requirements = new LinkedHashMap<>();
 
   // A map from subsystems registered with the scheduler to their default commands.  Also used
   // as a list of currently-registered subsystems.
-  private final Map<Subsystem, Command> m_subsystems = new LinkedHashMap<>();
+  private final Map<CommandMutex, Command> m_subsystems = new LinkedHashMap<>();
+
+  private final List<Runnable> m_periodics = new ArrayList<>();
+  private final List<Runnable> m_simPeriodics = new ArrayList<>();
 
   private final EventLoop m_defaultButtonLoop = new EventLoop();
   // The set of currently-registered buttons that will be polled every iteration.
@@ -152,9 +155,9 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    * @param command The command to initialize
    * @param requirements The command requirements
    */
-  private void initCommand(Command command, Set<Subsystem> requirements) {
+  private void initCommand(Command command, Set<CommandMutex> requirements) {
     m_scheduledCommands.add(command);
-    for (Subsystem requirement : requirements) {
+    for (CommandMutex requirement : requirements) {
       m_requirements.put(requirement, command);
     }
     command.initialize();
@@ -193,7 +196,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
       return;
     }
 
-    Set<Subsystem> requirements = command.getRequirements();
+    Set<CommandMutex> requirements = command.getRequirements();
 
     // Schedule the command if the requirements are not currently in-use.
     if (Collections.disjoint(m_requirements.keySet(), requirements)) {
@@ -201,14 +204,14 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
     } else {
       // Else check if the requirements that are in use have all have interruptible commands,
       // and if so, interrupt those commands and schedule the new command.
-      for (Subsystem requirement : requirements) {
+      for (CommandMutex requirement : requirements) {
         Command requiring = requiring(requirement);
         if (requiring != null
             && requiring.getInterruptionBehavior() == InterruptionBehavior.kCancelIncoming) {
           return;
         }
       }
-      for (Subsystem requirement : requirements) {
+      for (CommandMutex requirement : requirements) {
         Command requiring = requiring(requirement);
         if (requiring != null) {
           cancel(requiring);
@@ -250,12 +253,17 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
     m_watchdog.reset();
 
     // Run the periodic method of all registered subsystems.
-    for (Subsystem subsystem : m_subsystems.keySet()) {
-      subsystem.periodic();
-      if (RobotBase.isSimulation()) {
-        subsystem.simulationPeriodic();
+    for (var periodic : m_periodics) {
+      periodic.run();
+      m_watchdog.addEpoch(
+          periodic.getClass().getSimpleName()
+              + ".periodic()"); // TODO: need to make interface for periodics so that lambdas are
+      // supported but also "subsystems"
+    }
+    if (RobotBase.isSimulation()) {
+      for (var simPeriodic : m_simPeriodics) {
+        simPeriodic.run();
       }
-      m_watchdog.addEpoch(subsystem.getClass().getSimpleName() + ".periodic()");
     }
 
     // Cache the active instance to avoid concurrency problems if setActiveLoop() is called from
@@ -312,7 +320,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
     m_toCancel.clear();
 
     // Add default commands for un-required registered subsystems.
-    for (Map.Entry<Subsystem, Command> subsystemCommand : m_subsystems.entrySet()) {
+    for (Map.Entry<CommandMutex, Command> subsystemCommand : m_subsystems.entrySet()) {
       if (!m_requirements.containsKey(subsystemCommand.getKey())
           && subsystemCommand.getValue() != null) {
         schedule(subsystemCommand.getValue());
@@ -333,8 +341,8 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    *
    * @param subsystems the subsystem to register
    */
-  public void registerSubsystem(Subsystem... subsystems) {
-    for (Subsystem subsystem : subsystems) {
+  public void registerSubsystem(CommandMutex... subsystems) {
+    for (CommandMutex subsystem : subsystems) {
       if (subsystem == null) {
         DriverStation.reportWarning("Tried to register a null subsystem", true);
         continue;
@@ -353,7 +361,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    *
    * @param subsystems the subsystem to un-register
    */
-  public void unregisterSubsystem(Subsystem... subsystems) {
+  public void unregisterSubsystem(CommandMutex... subsystems) {
     m_subsystems.keySet().removeAll(Set.of(subsystems));
   }
 
@@ -366,6 +374,30 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
     m_subsystems.clear();
   }
 
+  public void addPeriodic(Runnable periodic) {
+    m_periodics.add(periodic);
+  }
+
+  public void removePeriodic(Runnable toRemove) {
+    m_periodics.remove(toRemove);
+  }
+
+  public void removeAllPeriodics() {
+    m_periodics.clear();
+  }
+
+  public void addSimPeriodic(Runnable periodic) {
+    m_simPeriodics.add(periodic);
+  }
+
+  public void removeSimPeriodic(Runnable toRemove) {
+    m_simPeriodics.remove(toRemove);
+  }
+
+  public void removeAllSimPeriodics() {
+    m_simPeriodics.clear();
+  }
+
   /**
    * Sets the default command for a subsystem. Registers that subsystem if it is not already
    * registered. Default commands will run whenever there is no other command currently scheduled
@@ -376,7 +408,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    * @param subsystem the subsystem whose default command will be set
    * @param defaultCommand the default command to associate with the subsystem
    */
-  public void setDefaultCommand(Subsystem subsystem, Command defaultCommand) {
+  public void setDefaultCommand(CommandMutex subsystem, Command defaultCommand) {
     if (subsystem == null) {
       DriverStation.reportWarning("Tried to set a default command for a null subsystem", true);
       return;
@@ -410,7 +442,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    *
    * @param subsystem the subsystem whose default command will be removed
    */
-  public void removeDefaultCommand(Subsystem subsystem) {
+  public void removeDefaultCommand(CommandMutex subsystem) {
     if (subsystem == null) {
       DriverStation.reportWarning("Tried to remove a default command for a null subsystem", true);
       return;
@@ -426,7 +458,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    * @param subsystem the subsystem to inquire about
    * @return the default command associated with the subsystem
    */
-  public Command getDefaultCommand(Subsystem subsystem) {
+  public Command getDefaultCommand(CommandMutex subsystem) {
     return m_subsystems.get(subsystem);
   }
 
@@ -490,7 +522,7 @@ public final class CommandScheduler implements Sendable, AutoCloseable {
    * @return the command currently requiring the subsystem, or null if no command is currently
    *     scheduled
    */
-  public Command requiring(Subsystem subsystem) {
+  public Command requiring(CommandMutex subsystem) {
     return m_requirements.get(subsystem);
   }
 
