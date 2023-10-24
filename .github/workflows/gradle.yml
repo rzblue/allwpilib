@@ -115,7 +115,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: 11
           architecture: ${{ matrix.architecture }}
       - name: Import Developer ID Certificate
         uses: wpilibsuite/import-signing-certificate@v1
@@ -236,7 +236,7 @@ jobs:
           (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: 11
       - name: Combine (Main)
         if: |
           github.repository_owner == 'wpilibsuite' &&
