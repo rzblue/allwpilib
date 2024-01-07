@@ -21,6 +21,7 @@ static constexpr std::string_view kTableName{"Preferences"};
 
 namespace {
 struct Instance {
+  // This is a comment to invalidate the cache.
   Instance();
 
   std::shared_ptr<nt::NetworkTable> table{
