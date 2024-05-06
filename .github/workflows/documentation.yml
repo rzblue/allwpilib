@@ -10,6 +10,19 @@ env:
   BASE_PATH: allwpilib/docs
 
 jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - name: Build with Gradle
+        run: ./gradlew docs:generateJavaDocs docs:doxygen -PbuildServer
   publish:
     name: "Documentation - Publish"
     runs-on: ubuntu-22.04
