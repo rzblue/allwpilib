@@ -63,3 +63,7 @@ void HAL_ExitMain(void) {
 }
 
 }  // extern "C"
+#include <bit>
+#ifdef __cpp_lib_bit_cast
+#error "BITCAST IS GOOD LOL"abort
+#endif
