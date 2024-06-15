@@ -63,7 +63,7 @@ jobs:
           mv ${{ matrix.bookworm-type }} bookworm-toolchain
       - name: Shim toolchain dir (non-bookworm)
         if: (!startsWith(matrix.artifact-name, 'Bookworm'))
-        run: mkdir bookworm-toolchain
+        run: mkdir /work/bookworm-toolchain
       - name: Test toolchain
         if: startsWith(matrix.artifact-name, 'Bookworm')
         run: bookworm-toolchain/bin/${{ matrix.bookworm-prefix }}g++ -v

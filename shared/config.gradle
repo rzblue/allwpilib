@@ -22,50 +22,6 @@ nativeUtils {
     }
 }
 
-if(project.hasProperty("bookworm")) {
-    toolchainsPlugin.crossCompilers {
-        bookworm-linuxarm64 {
-            architecture = "arm"
-            compilerPrefix = "aarch64-bookworm-linux-gnu-"
-            operatingSystem = "linux"
-            optional = false
-        }
-    }
-    nativeUtils.platformConfigs {
-        bookworm-linuxarm64 {
-            platformPath = "linux/bookworm-arm64"
-            cppCompiler.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossCompilerArgs);
-            cCompiler.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossCCompilerArgs);
-            linker.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossLinkerArgs);
-            cppCompiler.debugArgs.addAll(nativeUtils.wpi.defaultArguments.linuxCrossDebugCompilerArgs);
-            cppCompiler.releaseArgs.addAll(nativeUtils.wpi.defaultArguments.linuxCrossReleaseCompilerArgs);
-        }
-    }
-}
-
-if(project.hasProperty("raspi-bookworm")) {
-    toolchainsPlugin.crossCompilers {
-        bookworm-linuxarm32 {
-            architecture = "arm"
-            compilerPrefix = "armv6-bookworm-linux-gnueabihf-"
-            operatingSystem = "linux"
-            optional = false
-        }
-    }
-    nativeUtils.platformConfigs {
-        bookworm-linuxarm32 {
-            platformPath = "linux/bookworm-arm32"
-            cppCompiler.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossCompilerArgs);
-            cCompiler.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossCCompilerArgs);
-            linker.args.addAll(nativeUtils.wpi.defaultArguments.linuxCrossLinkerArgs);
-            cppCompiler.debugArgs.addAll(nativeUtils.wpi.defaultArguments.linuxCrossDebugCompilerArgs);
-            cppCompiler.releaseArgs.addAll(nativeUtils.wpi.defaultArguments.linuxCrossReleaseCompilerArgs);
-        }
-    }
-}
-
-
-
 nativeUtils.wpi.addWarnings()
 nativeUtils.wpi.addWarningsAsErrors()
 
