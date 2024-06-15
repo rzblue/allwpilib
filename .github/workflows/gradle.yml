@@ -51,12 +51,15 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install toolchain (bookworm)
         if: startsWith(matrix.artifact-name, 'Bookworm')
         run: |
           gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/rzblue/opensdk/actions/artifacts/${{matrix.bookworm-artifact}}/zip > artifact.zip
           unzip artifact.zip && rm artifact.zip
-          tar -xzf *.tgz
+          tar -xzf *.tgz && rm *.tgz
           mv ${{ matrix.bookworm-type }} bookworm-toolchain
       - name: Shim toolchain dir (non-bookworm)
         if: (!startsWith(matrix.artifact-name, 'Bookworm'))
@@ -64,9 +67,6 @@ jobs:
       - name: Test toolchain
         if: startsWith(matrix.artifact-name, 'Bookworm')
         run: bookworm-toolchain/${{ matrix.bookworm-prefix }}g++ -v
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set release environment variable
         run: echo "EXTRA_GRADLE_ARGS=-PreleaseMode" >> $GITHUB_ENV
         if: startsWith(github.ref, 'refs/tags/v')
