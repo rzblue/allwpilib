@@ -24,6 +24,18 @@ jobs:
           - container: wpilib/ubuntu-base:22.04
             artifact-name: Linux
             build-options: "-Ponlylinuxx86-64"
+          #- container: wpilib/ubuntu-base:22.04
+          #  artifact-name: Bookworm-Arm32
+          #  build-options: "-Praspi-bookworm -Ponlybookworm-linuxarm32"
+          #  bookworm-type: "raspi-bookworm"
+          #  bookworm-artifact: "1601831803"
+          #  bookworm-prefix: "armv6-bookworm-linux-gnueabihf-"
+          - container: wpilib/ubuntu-base:22.04
+            artifact-name: Bookworm-Arm64
+            build-options: "-Pbookworm -Ponlybookworm-linuxarm64"
+            bookworm-type: "bookworm"
+            bookworm-artifact: "1601831803"
+            bookworm-prefix: "aarch64-bookworm-linux-gnu-"
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ubuntu-22.04
     steps:
@@ -37,6 +49,17 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: false
+      - name: Install toolchain (bookworm)
+        if: startsWith(matrix.artifact-name, 'Bookworm')
+        run: |
+          gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/rzblue/opensdk/actions/artifacts/${{matrix.bookworm-artifact}}/zip > artifact.zip
+          unzip artifact.zip && rm artifact.zip
+          tar -xzf *.tgz
+          cp -Rp ${{ matrix.bookworm-type }}/* /bookworm-toolchain
+          rm -rf ${{ matrix.bookworm-type }}
+      - name: Test toolchain
+        if: startsWith(matrix.artifact-name, 'Bookworm')
+        run: /bookworm-toolchain/${{ matrix.bookworm-prefix }}g++ -v
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -47,8 +70,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ${{ matrix.container }}
-          options: -v ${{ github.workspace }}:/work -w /work -e ARTIFACTORY_PUBLISH_USERNAME -e ARTIFACTORY_PUBLISH_PASSWORD -e GITHUB_REF -e CI
-          run: df . && rm -f semicolon_delimited_script && echo $GITHUB_REF && ./gradlew build --build-cache -PbuildServer -PskipJavaFormat ${{ matrix.build-options }} ${{ env.EXTRA_GRADLE_ARGS }}
+          options: -v /bookworm-toolchain:/bookworm-toolchain -v ${{ github.workspace }}:/work -w /work -e ARTIFACTORY_PUBLISH_USERNAME -e ARTIFACTORY_PUBLISH_PASSWORD -e GITHUB_REF -e CI
+          run: cp -Rp /bookworm-toolchain/* /usr && df . && rm -f semicolon_delimited_script && echo $GITHUB_REF && ./gradlew build --build-cache -PbuildServer -PskipJavaFormat ${{ matrix.build-options }} ${{ env.EXTRA_GRADLE_ARGS }}
         env:
           ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
