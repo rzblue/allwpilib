@@ -57,15 +57,13 @@ jobs:
           gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/rzblue/opensdk/actions/artifacts/${{matrix.bookworm-artifact}}/zip > artifact.zip
           unzip artifact.zip && rm artifact.zip
           tar -xzf *.tgz
-          mkdir /bookworm-toolchain
-          cp -Rp ${{ matrix.bookworm-type }}/* /bookworm-toolchain
-          rm -rf ${{ matrix.bookworm-type }}
+          mv ${{ matrix.bookworm-type }} bookworm-toolchain
       - name: Shim toolchain dir (non-bookworm)
         if: (!startsWith(matrix.artifact-name, 'Bookworm'))
-        run: mkdir /bookworm-toolchain
+        run: mkdir bookworm-toolchain
       - name: Test toolchain
         if: startsWith(matrix.artifact-name, 'Bookworm')
-        run: /bookworm-toolchain/${{ matrix.bookworm-prefix }}g++ -v
+        run: bookworm-toolchain/${{ matrix.bookworm-prefix }}g++ -v
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -76,8 +74,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: ${{ matrix.container }}
-          options: -v /bookworm-toolchain:/bookworm-toolchain -v ${{ github.workspace }}:/work -w /work -e ARTIFACTORY_PUBLISH_USERNAME -e ARTIFACTORY_PUBLISH_PASSWORD -e GITHUB_REF -e CI
-          run: cp -Rp /bookworm-toolchain/* /usr && df . && rm -f semicolon_delimited_script && echo $GITHUB_REF && ./gradlew build --build-cache -PbuildServer -PskipJavaFormat ${{ matrix.build-options }} ${{ env.EXTRA_GRADLE_ARGS }}
+          options: -v ${{ github.workspace }}:/work -w /work -e ARTIFACTORY_PUBLISH_USERNAME -e ARTIFACTORY_PUBLISH_PASSWORD -e GITHUB_REF -e CI
+          run: cp -Rp /work/bookworm-toolchain/* /usr && df . && rm -f semicolon_delimited_script && echo $GITHUB_REF && ./gradlew build --build-cache -PbuildServer -PskipJavaFormat ${{ matrix.build-options }} ${{ env.EXTRA_GRADLE_ARGS }}
         env:
           ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
