@@ -28,13 +28,13 @@ jobs:
           #  artifact-name: Bookworm-Arm32
           #  build-options: "-Praspi-bookworm -Ponlybookworm-linuxarm32"
           #  bookworm-type: "raspi-bookworm"
-          #  bookworm-artifact: "1601831803"
+          #  bookworm-artifact: "1604471206"
           #  bookworm-prefix: "armv6-bookworm-linux-gnueabihf-"
           - container: wpilib/ubuntu-base:22.04
             artifact-name: Bookworm-Arm64
             build-options: "-Pbookworm -Ponlybookworm-linuxarm64"
             bookworm-type: "bookworm"
-            bookworm-artifact: "1601831803"
+            bookworm-artifact: "1604471182"
             bookworm-prefix: "aarch64-bookworm-linux-gnu-"
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ubuntu-22.04
@@ -66,7 +66,7 @@ jobs:
         run: mkdir bookworm-toolchain
       - name: Test toolchain
         if: startsWith(matrix.artifact-name, 'Bookworm')
-        run: bookworm-toolchain/${{ matrix.bookworm-prefix }}g++ -v
+        run: bookworm-toolchain/bin/${{ matrix.bookworm-prefix }}g++ -v
       - name: Set release environment variable
         run: echo "EXTRA_GRADLE_ARGS=-PreleaseMode" >> $GITHUB_ENV
         if: startsWith(github.ref, 'refs/tags/v')
