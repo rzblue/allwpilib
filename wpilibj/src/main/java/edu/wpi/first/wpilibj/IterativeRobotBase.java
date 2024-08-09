@@ -416,7 +416,7 @@ public abstract class IterativeRobotBase extends RobotBase {
 
     // Flush NetworkTables
     if (m_ntFlushEnabled) {
-      NetworkTableInstance.getDefault().flushLocal();
+      NetworkTableInstance.getDefault().flush();
     }
 
     // Warn on loop time overruns
