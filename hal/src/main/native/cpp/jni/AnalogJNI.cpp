@@ -32,8 +32,8 @@ Java_edu_wpi_first_hal_AnalogJNI_initializeAnalogInputPort
 {
   int32_t status = 0;
   auto stack = wpi::java::GetJavaStackTrace(env, "edu.wpi.first");
-  auto analog =
-      HAL_InitializeAnalogInputPort((HAL_PortHandle)id, stack.c_str(), &status);
+  auto analog = HAL_InitializeAnalogInputPort(static_cast<HAL_PortHandle>(id),
+                                              stack.c_str(), &status);
   CheckStatusForceThrow(env, status);
   return (jint)analog;
 }
@@ -47,7 +47,7 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_AnalogJNI_freeAnalogInputPort
   (JNIEnv* env, jclass, jint id)
 {
-  HAL_FreeAnalogInputPort((HAL_AnalogInputHandle)id);
+  HAL_FreeAnalogInputPort(static_cast<HAL_AnalogInputHandle>(id));
 }
 
 /*
@@ -62,7 +62,7 @@ Java_edu_wpi_first_hal_AnalogJNI_initializeAnalogOutputPort
   int32_t status = 0;
   auto stack = wpi::java::GetJavaStackTrace(env, "edu.wpi.first");
   HAL_AnalogOutputHandle analog = HAL_InitializeAnalogOutputPort(
-      (HAL_PortHandle)id, stack.c_str(), &status);
+      static_cast<HAL_PortHandle>(id), stack.c_str(), &status);
   CheckStatusForceThrow(env, status);
   return (jlong)analog;
 }
@@ -76,7 +76,7 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_AnalogJNI_freeAnalogOutputPort
   (JNIEnv* env, jclass, jint id)
 {
-  HAL_FreeAnalogOutputPort((HAL_AnalogOutputHandle)id);
+  HAL_FreeAnalogOutputPort(static_cast<HAL_AnalogOutputHandle>(id));
 }
 
 /*
@@ -127,8 +127,8 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_AnalogJNI_setAnalogInputSimDevice
   (JNIEnv* env, jclass, jint handle, jint device)
 {
-  HAL_SetAnalogInputSimDevice((HAL_AnalogInputHandle)handle,
-                              (HAL_SimDeviceHandle)device);
+  HAL_SetAnalogInputSimDevice(static_cast<HAL_AnalogInputHandle>(handle),
+                              static_cast<HAL_SimDeviceHandle>(device));
 }
 
 /*
@@ -141,7 +141,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogOutput
   (JNIEnv* env, jclass, jint id, jdouble voltage)
 {
   int32_t status = 0;
-  HAL_SetAnalogOutput((HAL_AnalogOutputHandle)id, voltage, &status);
+  HAL_SetAnalogOutput(static_cast<HAL_AnalogOutputHandle>(id), voltage,
+                      &status);
   CheckStatus(env, status);
 }
 
@@ -155,7 +156,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogOutput
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  double val = HAL_GetAnalogOutput((HAL_AnalogOutputHandle)id, &status);
+  double val =
+      HAL_GetAnalogOutput(static_cast<HAL_AnalogOutputHandle>(id), &status);
   CheckStatus(env, status);
   return val;
 }
@@ -199,7 +201,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogAverageBits
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetAnalogAverageBits((HAL_AnalogInputHandle)id, value, &status);
+  HAL_SetAnalogAverageBits(static_cast<HAL_AnalogInputHandle>(id), value,
+                           &status);
   CheckStatus(env, status);
 }
 
@@ -214,7 +217,7 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogAverageBits
 {
   int32_t status = 0;
   jint returnValue =
-      HAL_GetAnalogAverageBits((HAL_AnalogInputHandle)id, &status);
+      HAL_GetAnalogAverageBits(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -229,7 +232,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogOversampleBits
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetAnalogOversampleBits((HAL_AnalogInputHandle)id, value, &status);
+  HAL_SetAnalogOversampleBits(static_cast<HAL_AnalogInputHandle>(id), value,
+                              &status);
   CheckStatus(env, status);
 }
 
@@ -243,8 +247,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogOversampleBits
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue =
-      HAL_GetAnalogOversampleBits((HAL_AnalogInputHandle)id, &status);
+  jint returnValue = HAL_GetAnalogOversampleBits(
+      static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -259,7 +263,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogValue
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jshort returnValue = HAL_GetAnalogValue((HAL_AnalogInputHandle)id, &status);
+  jshort returnValue =
+      HAL_GetAnalogValue(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -274,8 +279,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogAverageValue
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue =
-      HAL_GetAnalogAverageValue((HAL_AnalogInputHandle)id, &status);
+  jint returnValue = HAL_GetAnalogAverageValue(
+      static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -290,8 +295,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogVoltsToValue
   (JNIEnv* env, jclass, jint id, jdouble voltageValue)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetAnalogVoltsToValue((HAL_AnalogInputHandle)id,
-                                               voltageValue, &status);
+  jint returnValue = HAL_GetAnalogVoltsToValue(
+      static_cast<HAL_AnalogInputHandle>(id), voltageValue, &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -306,8 +311,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogValueToVolts
   (JNIEnv* env, jclass, jint id, jint rawValue)
 {
   int32_t status = 0;
-  jdouble returnValue =
-      HAL_GetAnalogValueToVolts((HAL_AnalogInputHandle)id, rawValue, &status);
+  jdouble returnValue = HAL_GetAnalogValueToVolts(
+      static_cast<HAL_AnalogInputHandle>(id), rawValue, &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -323,7 +328,7 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogVoltage
 {
   int32_t status = 0;
   jdouble returnValue =
-      HAL_GetAnalogVoltage((HAL_AnalogInputHandle)id, &status);
+      HAL_GetAnalogVoltage(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -338,8 +343,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogAverageVoltage
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue =
-      HAL_GetAnalogAverageVoltage((HAL_AnalogInputHandle)id, &status);
+  jdouble returnValue = HAL_GetAnalogAverageVoltage(
+      static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -355,7 +360,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogLSBWeight
 {
   int32_t status = 0;
 
-  jint returnValue = HAL_GetAnalogLSBWeight((HAL_AnalogInputHandle)id, &status);
+  jint returnValue =
+      HAL_GetAnalogLSBWeight(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -371,7 +377,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogOffset
 {
   int32_t status = 0;
 
-  jint returnValue = HAL_GetAnalogOffset((HAL_AnalogInputHandle)id, &status);
+  jint returnValue =
+      HAL_GetAnalogOffset(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -388,7 +395,7 @@ Java_edu_wpi_first_hal_AnalogJNI_isAccumulatorChannel
   int32_t status = 0;
 
   jboolean returnValue =
-      HAL_IsAccumulatorChannel((HAL_AnalogInputHandle)id, &status);
+      HAL_IsAccumulatorChannel(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -403,7 +410,7 @@ Java_edu_wpi_first_hal_AnalogJNI_initAccumulator
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_InitAccumulator((HAL_AnalogInputHandle)id, &status);
+  HAL_InitAccumulator(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -417,7 +424,7 @@ Java_edu_wpi_first_hal_AnalogJNI_resetAccumulator
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ResetAccumulator((HAL_AnalogInputHandle)id, &status);
+  HAL_ResetAccumulator(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -431,7 +438,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAccumulatorCenter
   (JNIEnv* env, jclass, jint id, jint center)
 {
   int32_t status = 0;
-  HAL_SetAccumulatorCenter((HAL_AnalogInputHandle)id, center, &status);
+  HAL_SetAccumulatorCenter(static_cast<HAL_AnalogInputHandle>(id), center,
+                           &status);
   CheckStatus(env, status);
 }
 
@@ -445,7 +453,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAccumulatorDeadband
   (JNIEnv* env, jclass, jint id, jint deadband)
 {
   int32_t status = 0;
-  HAL_SetAccumulatorDeadband((HAL_AnalogInputHandle)id, deadband, &status);
+  HAL_SetAccumulatorDeadband(static_cast<HAL_AnalogInputHandle>(id), deadband,
+                             &status);
   CheckStatus(env, status);
 }
 
@@ -460,7 +469,7 @@ Java_edu_wpi_first_hal_AnalogJNI_getAccumulatorValue
 {
   int32_t status = 0;
   jlong returnValue =
-      HAL_GetAccumulatorValue((HAL_AnalogInputHandle)id, &status);
+      HAL_GetAccumulatorValue(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
 
   return returnValue;
@@ -477,7 +486,7 @@ Java_edu_wpi_first_hal_AnalogJNI_getAccumulatorCount
 {
   int32_t status = 0;
   jint returnValue =
-      HAL_GetAccumulatorCount((HAL_AnalogInputHandle)id, &status);
+      HAL_GetAccumulatorCount(static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -494,7 +503,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAccumulatorOutput
   int32_t status = 0;
   int64_t value = 0;
   int64_t count = 0;
-  HAL_GetAccumulatorOutput((HAL_AnalogInputHandle)id, &value, &count, &status);
+  HAL_GetAccumulatorOutput(static_cast<HAL_AnalogInputHandle>(id), &value,
+                           &count, &status);
   SetAccumulatorResultObject(env, accumulatorResult, value, count);
   CheckStatus(env, status);
 }
@@ -509,8 +519,8 @@ Java_edu_wpi_first_hal_AnalogJNI_initializeAnalogTrigger
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_AnalogTriggerHandle analogTrigger =
-      HAL_InitializeAnalogTrigger((HAL_AnalogInputHandle)id, &status);
+  HAL_AnalogTriggerHandle analogTrigger = HAL_InitializeAnalogTrigger(
+      static_cast<HAL_AnalogInputHandle>(id), &status);
   CheckStatus(env, status);
   return (jint)analogTrigger;
 }
@@ -525,8 +535,8 @@ Java_edu_wpi_first_hal_AnalogJNI_initializeAnalogTriggerDutyCycle
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_AnalogTriggerHandle analogTrigger =
-      HAL_InitializeAnalogTriggerDutyCycle((HAL_DutyCycleHandle)id, &status);
+  HAL_AnalogTriggerHandle analogTrigger = HAL_InitializeAnalogTriggerDutyCycle(
+      static_cast<HAL_DutyCycleHandle>(id), &status);
   CheckStatus(env, status);
   return (jint)analogTrigger;
 }
@@ -541,7 +551,7 @@ Java_edu_wpi_first_hal_AnalogJNI_cleanAnalogTrigger
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_CleanAnalogTrigger((HAL_AnalogTriggerHandle)id, &status);
+  HAL_CleanAnalogTrigger(static_cast<HAL_AnalogTriggerHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -555,8 +565,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogTriggerLimitsRaw
   (JNIEnv* env, jclass, jint id, jint lower, jint upper)
 {
   int32_t status = 0;
-  HAL_SetAnalogTriggerLimitsRaw((HAL_AnalogTriggerHandle)id, lower, upper,
-                                &status);
+  HAL_SetAnalogTriggerLimitsRaw(static_cast<HAL_AnalogTriggerHandle>(id), lower,
+                                upper, &status);
   CheckStatus(env, status);
 }
 
@@ -570,8 +580,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogTriggerLimitsDutyCycle
   (JNIEnv* env, jclass, jint id, jdouble lower, jdouble upper)
 {
   int32_t status = 0;
-  HAL_SetAnalogTriggerLimitsDutyCycle((HAL_AnalogTriggerHandle)id, lower, upper,
-                                      &status);
+  HAL_SetAnalogTriggerLimitsDutyCycle(static_cast<HAL_AnalogTriggerHandle>(id),
+                                      lower, upper, &status);
   CheckStatus(env, status);
 }
 
@@ -585,8 +595,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogTriggerLimitsVoltage
   (JNIEnv* env, jclass, jint id, jdouble lower, jdouble upper)
 {
   int32_t status = 0;
-  HAL_SetAnalogTriggerLimitsVoltage((HAL_AnalogTriggerHandle)id, lower, upper,
-                                    &status);
+  HAL_SetAnalogTriggerLimitsVoltage(static_cast<HAL_AnalogTriggerHandle>(id),
+                                    lower, upper, &status);
   CheckStatus(env, status);
 }
 
@@ -600,7 +610,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogTriggerAveraged
   (JNIEnv* env, jclass, jint id, jboolean averaged)
 {
   int32_t status = 0;
-  HAL_SetAnalogTriggerAveraged((HAL_AnalogTriggerHandle)id, averaged, &status);
+  HAL_SetAnalogTriggerAveraged(static_cast<HAL_AnalogTriggerHandle>(id),
+                               averaged, &status);
   CheckStatus(env, status);
 }
 
@@ -614,7 +625,8 @@ Java_edu_wpi_first_hal_AnalogJNI_setAnalogTriggerFiltered
   (JNIEnv* env, jclass, jint id, jboolean filtered)
 {
   int32_t status = 0;
-  HAL_SetAnalogTriggerFiltered((HAL_AnalogTriggerHandle)id, filtered, &status);
+  HAL_SetAnalogTriggerFiltered(static_cast<HAL_AnalogTriggerHandle>(id),
+                               filtered, &status);
   CheckStatus(env, status);
 }
 
@@ -628,8 +640,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogTriggerInWindow
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean val =
-      HAL_GetAnalogTriggerInWindow((HAL_AnalogTriggerHandle)id, &status);
+  jboolean val = HAL_GetAnalogTriggerInWindow(
+      static_cast<HAL_AnalogTriggerHandle>(id), &status);
   CheckStatus(env, status);
   return val;
 }
@@ -644,8 +656,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogTriggerTriggerState
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean val =
-      HAL_GetAnalogTriggerTriggerState((HAL_AnalogTriggerHandle)id, &status);
+  jboolean val = HAL_GetAnalogTriggerTriggerState(
+      static_cast<HAL_AnalogTriggerHandle>(id), &status);
   CheckStatus(env, status);
   return val;
 }
@@ -660,8 +672,9 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogTriggerOutput
   (JNIEnv* env, jclass, jint id, jint type)
 {
   int32_t status = 0;
-  jboolean val = HAL_GetAnalogTriggerOutput(
-      (HAL_AnalogTriggerHandle)id, (HAL_AnalogTriggerType)type, &status);
+  jboolean val =
+      HAL_GetAnalogTriggerOutput(static_cast<HAL_AnalogTriggerHandle>(id),
+                                 (HAL_AnalogTriggerType)type, &status);
   CheckStatus(env, status);
   return val;
 }
@@ -676,8 +689,8 @@ Java_edu_wpi_first_hal_AnalogJNI_getAnalogTriggerFPGAIndex
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  auto val =
-      HAL_GetAnalogTriggerFPGAIndex((HAL_AnalogTriggerHandle)id, &status);
+  auto val = HAL_GetAnalogTriggerFPGAIndex(
+      static_cast<HAL_AnalogTriggerHandle>(id), &status);
   CheckStatus(env, status);
   return val;
 }

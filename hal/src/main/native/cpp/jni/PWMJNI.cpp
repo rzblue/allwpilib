@@ -30,7 +30,8 @@ Java_edu_wpi_first_hal_PWMJNI_initializePWMPort
 {
   int32_t status = 0;
   auto stack = wpi::java::GetJavaStackTrace(env, "edu.wpi.first");
-  auto pwm = HAL_InitializePWMPort((HAL_PortHandle)id, stack.c_str(), &status);
+  auto pwm = HAL_InitializePWMPort(static_cast<HAL_PortHandle>(id),
+                                   stack.c_str(), &status);
   CheckStatusForceThrow(env, status);
   return (jint)pwm;
 }
@@ -57,7 +58,7 @@ Java_edu_wpi_first_hal_PWMJNI_freePWMPort
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_FreePWMPort((HAL_DigitalHandle)id, &status);
+  HAL_FreePWMPort(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -72,8 +73,9 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMConfigMicroseconds
    jint centerPwm, jint deadbandMinPwm, jint minPwm)
 {
   int32_t status = 0;
-  HAL_SetPWMConfigMicroseconds((HAL_DigitalHandle)id, maxPwm, deadbandMaxPwm,
-                               centerPwm, deadbandMinPwm, minPwm, &status);
+  HAL_SetPWMConfigMicroseconds(static_cast<HAL_DigitalHandle>(id), maxPwm,
+                               deadbandMaxPwm, centerPwm, deadbandMinPwm,
+                               minPwm, &status);
   CheckStatus(env, status);
 }
 
@@ -92,8 +94,9 @@ Java_edu_wpi_first_hal_PWMJNI_getPWMConfigMicroseconds
   int32_t centerPwm = 0;
   int32_t deadbandMinPwm = 0;
   int32_t minPwm = 0;
-  HAL_GetPWMConfigMicroseconds((HAL_DigitalHandle)id, &maxPwm, &deadbandMaxPwm,
-                               &centerPwm, &deadbandMinPwm, &minPwm, &status);
+  HAL_GetPWMConfigMicroseconds(static_cast<HAL_DigitalHandle>(id), &maxPwm,
+                               &deadbandMaxPwm, &centerPwm, &deadbandMinPwm,
+                               &minPwm, &status);
   CheckStatus(env, status);
   return CreatePWMConfigDataResult(env, maxPwm, deadbandMaxPwm, centerPwm,
                                    deadbandMinPwm, minPwm);
@@ -109,7 +112,8 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMEliminateDeadband
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetPWMEliminateDeadband((HAL_DigitalHandle)id, value, &status);
+  HAL_SetPWMEliminateDeadband(static_cast<HAL_DigitalHandle>(id), value,
+                              &status);
   CheckStatus(env, status);
 }
 
@@ -123,7 +127,8 @@ Java_edu_wpi_first_hal_PWMJNI_getPWMEliminateDeadband
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  auto val = HAL_GetPWMEliminateDeadband((HAL_DigitalHandle)id, &status);
+  auto val =
+      HAL_GetPWMEliminateDeadband(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return (jboolean)val;
 }
@@ -138,7 +143,8 @@ Java_edu_wpi_first_hal_PWMJNI_setPulseTimeMicroseconds
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetPWMPulseTimeMicroseconds((HAL_DigitalHandle)id, value, &status);
+  HAL_SetPWMPulseTimeMicroseconds(static_cast<HAL_DigitalHandle>(id), value,
+                                  &status);
   CheckStatus(env, status);
 }
 
@@ -152,7 +158,7 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMSpeed
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetPWMSpeed((HAL_DigitalHandle)id, value, &status);
+  HAL_SetPWMSpeed(static_cast<HAL_DigitalHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -166,7 +172,7 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMPosition
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetPWMPosition((HAL_DigitalHandle)id, value, &status);
+  HAL_SetPWMPosition(static_cast<HAL_DigitalHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -180,8 +186,8 @@ Java_edu_wpi_first_hal_PWMJNI_getPulseTimeMicroseconds
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  int32_t returnValue =
-      HAL_GetPWMPulseTimeMicroseconds((HAL_DigitalHandle)id, &status);
+  int32_t returnValue = HAL_GetPWMPulseTimeMicroseconds(
+      static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -196,7 +202,8 @@ Java_edu_wpi_first_hal_PWMJNI_getPWMSpeed
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue = HAL_GetPWMSpeed((HAL_DigitalHandle)id, &status);
+  jdouble returnValue =
+      HAL_GetPWMSpeed(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -211,7 +218,8 @@ Java_edu_wpi_first_hal_PWMJNI_getPWMPosition
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue = HAL_GetPWMPosition((HAL_DigitalHandle)id, &status);
+  jdouble returnValue =
+      HAL_GetPWMPosition(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -226,7 +234,7 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMDisabled
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_SetPWMDisabled((HAL_DigitalHandle)id, &status);
+  HAL_SetPWMDisabled(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -240,7 +248,7 @@ Java_edu_wpi_first_hal_PWMJNI_latchPWMZero
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_LatchPWMZero((HAL_DigitalHandle)id, &status);
+  HAL_LatchPWMZero(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -254,7 +262,7 @@ Java_edu_wpi_first_hal_PWMJNI_setAlwaysHighMode
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_SetPWMAlwaysHighMode((HAL_DigitalHandle)id, &status);
+  HAL_SetPWMAlwaysHighMode(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -268,7 +276,7 @@ Java_edu_wpi_first_hal_PWMJNI_setPWMPeriodScale
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetPWMPeriodScale((HAL_DigitalHandle)id, value, &status);
+  HAL_SetPWMPeriodScale(static_cast<HAL_DigitalHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 

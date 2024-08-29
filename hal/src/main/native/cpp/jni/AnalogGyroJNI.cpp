@@ -27,8 +27,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_initializeAnalogGyro
 {
   int32_t status = 0;
   auto stack = wpi::java::GetJavaStackTrace(env, "edu.wpi.first");
-  HAL_GyroHandle handle = HAL_InitializeAnalogGyro((HAL_AnalogInputHandle)id,
-                                                   stack.c_str(), &status);
+  HAL_GyroHandle handle = HAL_InitializeAnalogGyro(
+      static_cast<HAL_AnalogInputHandle>(id), stack.c_str(), &status);
   // Analog input does range checking, so we don't need to do so.
   CheckStatusForceThrow(env, status);
   return (jint)handle;
@@ -44,7 +44,7 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_setupAnalogGyro
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_SetupAnalogGyro((HAL_GyroHandle)id, &status);
+  HAL_SetupAnalogGyro(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -57,7 +57,7 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_AnalogGyroJNI_freeAnalogGyro
   (JNIEnv* env, jclass, jint id)
 {
-  HAL_FreeAnalogGyro((HAL_GyroHandle)id);
+  HAL_FreeAnalogGyro(static_cast<HAL_GyroHandle>(id));
 }
 
 /*
@@ -70,8 +70,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_setAnalogGyroParameters
   (JNIEnv* env, jclass, jint id, jdouble vPDPS, jdouble offset, jint center)
 {
   int32_t status = 0;
-  HAL_SetAnalogGyroParameters((HAL_GyroHandle)id, vPDPS, offset, center,
-                              &status);
+  HAL_SetAnalogGyroParameters(static_cast<HAL_GyroHandle>(id), vPDPS, offset,
+                              center, &status);
   CheckStatus(env, status);
 }
 
@@ -85,7 +85,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_setAnalogGyroVoltsPerDegreePerSecond
   (JNIEnv* env, jclass, jint id, jdouble vPDPS)
 {
   int32_t status = 0;
-  HAL_SetAnalogGyroVoltsPerDegreePerSecond((HAL_GyroHandle)id, vPDPS, &status);
+  HAL_SetAnalogGyroVoltsPerDegreePerSecond(static_cast<HAL_GyroHandle>(id),
+                                           vPDPS, &status);
   CheckStatus(env, status);
 }
 
@@ -99,7 +100,7 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_resetAnalogGyro
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ResetAnalogGyro((HAL_GyroHandle)id, &status);
+  HAL_ResetAnalogGyro(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -113,7 +114,7 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_calibrateAnalogGyro
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_CalibrateAnalogGyro((HAL_GyroHandle)id, &status);
+  HAL_CalibrateAnalogGyro(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -127,7 +128,7 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_setAnalogGyroDeadband
   (JNIEnv* env, jclass, jint id, jdouble deadband)
 {
   int32_t status = 0;
-  HAL_SetAnalogGyroDeadband((HAL_GyroHandle)id, deadband, &status);
+  HAL_SetAnalogGyroDeadband(static_cast<HAL_GyroHandle>(id), deadband, &status);
   CheckStatus(env, status);
 }
 
@@ -141,7 +142,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_getAnalogGyroAngle
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble value = HAL_GetAnalogGyroAngle((HAL_GyroHandle)id, &status);
+  jdouble value =
+      HAL_GetAnalogGyroAngle(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
   return value;
 }
@@ -156,7 +158,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_getAnalogGyroRate
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble value = HAL_GetAnalogGyroRate((HAL_GyroHandle)id, &status);
+  jdouble value =
+      HAL_GetAnalogGyroRate(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
   return value;
 }
@@ -171,7 +174,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_getAnalogGyroOffset
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble value = HAL_GetAnalogGyroOffset((HAL_GyroHandle)id, &status);
+  jdouble value =
+      HAL_GetAnalogGyroOffset(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
   return value;
 }
@@ -186,7 +190,8 @@ Java_edu_wpi_first_hal_AnalogGyroJNI_getAnalogGyroCenter
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint value = HAL_GetAnalogGyroCenter((HAL_GyroHandle)id, &status);
+  jint value =
+      HAL_GetAnalogGyroCenter(static_cast<HAL_GyroHandle>(id), &status);
   CheckStatus(env, status);
   return value;
 }

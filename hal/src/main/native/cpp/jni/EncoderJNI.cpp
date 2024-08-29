@@ -47,7 +47,7 @@ Java_edu_wpi_first_hal_EncoderJNI_freeEncoder
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_FreeEncoder((HAL_EncoderHandle)id, &status);
+  HAL_FreeEncoder(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -60,8 +60,8 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_EncoderJNI_setEncoderSimDevice
   (JNIEnv* env, jclass, jint handle, jint device)
 {
-  HAL_SetEncoderSimDevice((HAL_EncoderHandle)handle,
-                          (HAL_SimDeviceHandle)device);
+  HAL_SetEncoderSimDevice(static_cast<HAL_EncoderHandle>(handle),
+                          static_cast<HAL_SimDeviceHandle>(device));
 }
 
 /*
@@ -74,7 +74,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoder
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetEncoder((HAL_EncoderHandle)id, &status);
+  jint returnValue =
+      HAL_GetEncoder(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -89,7 +90,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderRaw
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetEncoderRaw((HAL_EncoderHandle)id, &status);
+  jint returnValue =
+      HAL_GetEncoderRaw(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -105,7 +107,7 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncodingScaleFactor
 {
   int32_t status = 0;
   jint returnValue =
-      HAL_GetEncoderEncodingScale((HAL_EncoderHandle)id, &status);
+      HAL_GetEncoderEncodingScale(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -120,7 +122,7 @@ Java_edu_wpi_first_hal_EncoderJNI_resetEncoder
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ResetEncoder((HAL_EncoderHandle)id, &status);
+  HAL_ResetEncoder(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -134,7 +136,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderPeriod
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  double returnValue = HAL_GetEncoderPeriod((HAL_EncoderHandle)id, &status);
+  double returnValue =
+      HAL_GetEncoderPeriod(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -149,7 +152,7 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderMaxPeriod
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetEncoderMaxPeriod((HAL_EncoderHandle)id, value, &status);
+  HAL_SetEncoderMaxPeriod(static_cast<HAL_EncoderHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -163,7 +166,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderStopped
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean returnValue = HAL_GetEncoderStopped((HAL_EncoderHandle)id, &status);
+  jboolean returnValue =
+      HAL_GetEncoderStopped(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -179,7 +183,7 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderDirection
 {
   int32_t status = 0;
   jboolean returnValue =
-      HAL_GetEncoderDirection((HAL_EncoderHandle)id, &status);
+      HAL_GetEncoderDirection(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -194,7 +198,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderDistance
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue = HAL_GetEncoderDistance((HAL_EncoderHandle)id, &status);
+  jdouble returnValue =
+      HAL_GetEncoderDistance(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -209,7 +214,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderRate
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue = HAL_GetEncoderRate((HAL_EncoderHandle)id, &status);
+  jdouble returnValue =
+      HAL_GetEncoderRate(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -224,7 +230,7 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderMinRate
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetEncoderMinRate((HAL_EncoderHandle)id, value, &status);
+  HAL_SetEncoderMinRate(static_cast<HAL_EncoderHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -238,7 +244,8 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderDistancePerPulse
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetEncoderDistancePerPulse((HAL_EncoderHandle)id, value, &status);
+  HAL_SetEncoderDistancePerPulse(static_cast<HAL_EncoderHandle>(id), value,
+                                 &status);
   CheckStatus(env, status);
 }
 
@@ -252,7 +259,8 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderReverseDirection
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetEncoderReverseDirection((HAL_EncoderHandle)id, value, &status);
+  HAL_SetEncoderReverseDirection(static_cast<HAL_EncoderHandle>(id), value,
+                                 &status);
   CheckStatus(env, status);
 }
 
@@ -266,7 +274,8 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderSamplesToAverage
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetEncoderSamplesToAverage((HAL_EncoderHandle)id, value, &status);
+  HAL_SetEncoderSamplesToAverage(static_cast<HAL_EncoderHandle>(id), value,
+                                 &status);
   CheckStatus(env, status);
 }
 
@@ -280,8 +289,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderSamplesToAverage
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue =
-      HAL_GetEncoderSamplesToAverage((HAL_EncoderHandle)id, &status);
+  jint returnValue = HAL_GetEncoderSamplesToAverage(
+      static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -297,7 +306,7 @@ Java_edu_wpi_first_hal_EncoderJNI_setEncoderIndexSource
    jint analogTriggerType, jint type)
 {
   int32_t status = 0;
-  HAL_SetEncoderIndexSource((HAL_EncoderHandle)id,
+  HAL_SetEncoderIndexSource(static_cast<HAL_EncoderHandle>(id),
                             (HAL_Handle)digitalSourceHandle,
                             (HAL_AnalogTriggerType)analogTriggerType,
                             (HAL_EncoderIndexingType)type, &status);
@@ -314,7 +323,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderFPGAIndex
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetEncoderFPGAIndex((HAL_EncoderHandle)id, &status);
+  jint returnValue =
+      HAL_GetEncoderFPGAIndex(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -330,7 +340,7 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderEncodingScale
 {
   int32_t status = 0;
   jint returnValue =
-      HAL_GetEncoderEncodingScale((HAL_EncoderHandle)id, &status);
+      HAL_GetEncoderEncodingScale(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -345,8 +355,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderDecodingScaleFactor
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue =
-      HAL_GetEncoderDecodingScaleFactor((HAL_EncoderHandle)id, &status);
+  jdouble returnValue = HAL_GetEncoderDecodingScaleFactor(
+      static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -361,8 +371,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderDistancePerPulse
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue =
-      HAL_GetEncoderDistancePerPulse((HAL_EncoderHandle)id, &status);
+  jdouble returnValue = HAL_GetEncoderDistancePerPulse(
+      static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -377,7 +387,8 @@ Java_edu_wpi_first_hal_EncoderJNI_getEncoderEncodingType
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetEncoderEncodingType((HAL_EncoderHandle)id, &status);
+  jint returnValue =
+      HAL_GetEncoderEncodingType(static_cast<HAL_EncoderHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }

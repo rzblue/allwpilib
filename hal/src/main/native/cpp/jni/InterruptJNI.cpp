@@ -44,7 +44,7 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_InterruptJNI_cleanInterrupts
   (JNIEnv* env, jclass, jint interruptHandle)
 {
-  HAL_CleanInterrupts((HAL_InterruptHandle)interruptHandle);
+  HAL_CleanInterrupts(static_cast<HAL_InterruptHandle>(interruptHandle));
 }
 
 /*
@@ -58,8 +58,9 @@ Java_edu_wpi_first_hal_InterruptJNI_waitForInterrupt
    jboolean ignorePrevious)
 {
   int32_t status = 0;
-  int64_t result = HAL_WaitForInterrupt((HAL_InterruptHandle)interruptHandle,
-                                        timeout, ignorePrevious, &status);
+  int64_t result =
+      HAL_WaitForInterrupt(static_cast<HAL_InterruptHandle>(interruptHandle),
+                           timeout, ignorePrevious, &status);
 
   CheckStatus(env, status);
   return result;
@@ -76,9 +77,9 @@ Java_edu_wpi_first_hal_InterruptJNI_waitForMultipleInterrupts
    jboolean ignorePrevious)
 {
   int32_t status = 0;
-  int64_t result =
-      HAL_WaitForMultipleInterrupts((HAL_InterruptHandle)interruptHandle, mask,
-                                    timeout, ignorePrevious, &status);
+  int64_t result = HAL_WaitForMultipleInterrupts(
+      static_cast<HAL_InterruptHandle>(interruptHandle), mask, timeout,
+      ignorePrevious, &status);
 
   CheckStatus(env, status);
   return result;
@@ -95,7 +96,7 @@ Java_edu_wpi_first_hal_InterruptJNI_readInterruptRisingTimestamp
 {
   int32_t status = 0;
   jlong timeStamp = HAL_ReadInterruptRisingTimestamp(
-      (HAL_InterruptHandle)interruptHandle, &status);
+      static_cast<HAL_InterruptHandle>(interruptHandle), &status);
 
   CheckStatus(env, status);
   return timeStamp;
@@ -112,7 +113,7 @@ Java_edu_wpi_first_hal_InterruptJNI_readInterruptFallingTimestamp
 {
   int32_t status = 0;
   jlong timeStamp = HAL_ReadInterruptFallingTimestamp(
-      (HAL_InterruptHandle)interruptHandle, &status);
+      static_cast<HAL_InterruptHandle>(interruptHandle), &status);
 
   CheckStatus(env, status);
   return timeStamp;
@@ -129,7 +130,7 @@ Java_edu_wpi_first_hal_InterruptJNI_requestInterrupts
    jint analogTriggerType)
 {
   int32_t status = 0;
-  HAL_RequestInterrupts((HAL_InterruptHandle)interruptHandle,
+  HAL_RequestInterrupts(static_cast<HAL_InterruptHandle>(interruptHandle),
                         (HAL_Handle)digitalSourceHandle,
                         (HAL_AnalogTriggerType)analogTriggerType, &status);
 
@@ -147,8 +148,9 @@ Java_edu_wpi_first_hal_InterruptJNI_setInterruptUpSourceEdge
    jboolean fallingEdge)
 {
   int32_t status = 0;
-  HAL_SetInterruptUpSourceEdge((HAL_InterruptHandle)interruptHandle, risingEdge,
-                               fallingEdge, &status);
+  HAL_SetInterruptUpSourceEdge(
+      static_cast<HAL_InterruptHandle>(interruptHandle), risingEdge,
+      fallingEdge, &status);
 
   CheckStatus(env, status);
 }
@@ -163,7 +165,8 @@ Java_edu_wpi_first_hal_InterruptJNI_releaseWaitingInterrupt
   (JNIEnv* env, jclass, jint interruptHandle)
 {
   int32_t status = 0;
-  HAL_ReleaseWaitingInterrupt((HAL_InterruptHandle)interruptHandle, &status);
+  HAL_ReleaseWaitingInterrupt(static_cast<HAL_InterruptHandle>(interruptHandle),
+                              &status);
 
   CheckStatus(env, status);
 }

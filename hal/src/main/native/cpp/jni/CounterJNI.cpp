@@ -54,7 +54,7 @@ Java_edu_wpi_first_hal_CounterJNI_freeCounter
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_FreeCounter((HAL_CounterHandle)id, &status);
+  HAL_FreeCounter(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -68,7 +68,7 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterAverageSize
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetCounterAverageSize((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterAverageSize(static_cast<HAL_CounterHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -83,7 +83,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterUpSource
    jint analogTriggerType)
 {
   int32_t status = 0;
-  HAL_SetCounterUpSource((HAL_CounterHandle)id, (HAL_Handle)digitalSourceHandle,
+  HAL_SetCounterUpSource(static_cast<HAL_CounterHandle>(id),
+                         (HAL_Handle)digitalSourceHandle,
                          (HAL_AnalogTriggerType)analogTriggerType, &status);
   CheckStatus(env, status);
 }
@@ -98,8 +99,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterUpSourceEdge
   (JNIEnv* env, jclass, jint id, jboolean valueRise, jboolean valueFall)
 {
   int32_t status = 0;
-  HAL_SetCounterUpSourceEdge((HAL_CounterHandle)id, valueRise, valueFall,
-                             &status);
+  HAL_SetCounterUpSourceEdge(static_cast<HAL_CounterHandle>(id), valueRise,
+                             valueFall, &status);
   CheckStatus(env, status);
 }
 
@@ -113,7 +114,7 @@ Java_edu_wpi_first_hal_CounterJNI_clearCounterUpSource
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ClearCounterUpSource((HAL_CounterHandle)id, &status);
+  HAL_ClearCounterUpSource(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -128,7 +129,7 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterDownSource
    jint analogTriggerType)
 {
   int32_t status = 0;
-  HAL_SetCounterDownSource((HAL_CounterHandle)id,
+  HAL_SetCounterDownSource(static_cast<HAL_CounterHandle>(id),
                            (HAL_Handle)digitalSourceHandle,
                            (HAL_AnalogTriggerType)analogTriggerType, &status);
   CheckStatus(env, status);
@@ -144,8 +145,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterDownSourceEdge
   (JNIEnv* env, jclass, jint id, jboolean valueRise, jboolean valueFall)
 {
   int32_t status = 0;
-  HAL_SetCounterDownSourceEdge((HAL_CounterHandle)id, valueRise, valueFall,
-                               &status);
+  HAL_SetCounterDownSourceEdge(static_cast<HAL_CounterHandle>(id), valueRise,
+                               valueFall, &status);
   CheckStatus(env, status);
 }
 
@@ -159,7 +160,7 @@ Java_edu_wpi_first_hal_CounterJNI_clearCounterDownSource
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ClearCounterDownSource((HAL_CounterHandle)id, &status);
+  HAL_ClearCounterDownSource(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -173,7 +174,7 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterUpDownMode
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_SetCounterUpDownMode((HAL_CounterHandle)id, &status);
+  HAL_SetCounterUpDownMode(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -187,7 +188,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterExternalDirectionMode
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_SetCounterExternalDirectionMode((HAL_CounterHandle)id, &status);
+  HAL_SetCounterExternalDirectionMode(static_cast<HAL_CounterHandle>(id),
+                                      &status);
   CheckStatus(env, status);
 }
 
@@ -201,7 +203,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterSemiPeriodMode
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetCounterSemiPeriodMode((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterSemiPeriodMode(static_cast<HAL_CounterHandle>(id), value,
+                               &status);
   CheckStatus(env, status);
 }
 
@@ -215,7 +218,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterPulseLengthMode
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetCounterPulseLengthMode((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterPulseLengthMode(static_cast<HAL_CounterHandle>(id), value,
+                                &status);
   CheckStatus(env, status);
 }
 
@@ -229,8 +233,8 @@ Java_edu_wpi_first_hal_CounterJNI_getCounterSamplesToAverage
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue =
-      HAL_GetCounterSamplesToAverage((HAL_CounterHandle)id, &status);
+  jint returnValue = HAL_GetCounterSamplesToAverage(
+      static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -245,7 +249,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterSamplesToAverage
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetCounterSamplesToAverage((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterSamplesToAverage(static_cast<HAL_CounterHandle>(id), value,
+                                 &status);
   CheckStatus(env, status);
 }
 
@@ -259,7 +264,7 @@ Java_edu_wpi_first_hal_CounterJNI_resetCounter
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_ResetCounter((HAL_CounterHandle)id, &status);
+  HAL_ResetCounter(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -273,7 +278,8 @@ Java_edu_wpi_first_hal_CounterJNI_getCounter
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jint returnValue = HAL_GetCounter((HAL_CounterHandle)id, &status);
+  jint returnValue =
+      HAL_GetCounter(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -288,7 +294,8 @@ Java_edu_wpi_first_hal_CounterJNI_getCounterPeriod
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jdouble returnValue = HAL_GetCounterPeriod((HAL_CounterHandle)id, &status);
+  jdouble returnValue =
+      HAL_GetCounterPeriod(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -303,7 +310,7 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterMaxPeriod
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetCounterMaxPeriod((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterMaxPeriod(static_cast<HAL_CounterHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -317,7 +324,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterUpdateWhenEmpty
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetCounterUpdateWhenEmpty((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterUpdateWhenEmpty(static_cast<HAL_CounterHandle>(id), value,
+                                &status);
   CheckStatus(env, status);
 }
 
@@ -331,7 +339,8 @@ Java_edu_wpi_first_hal_CounterJNI_getCounterStopped
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean returnValue = HAL_GetCounterStopped((HAL_CounterHandle)id, &status);
+  jboolean returnValue =
+      HAL_GetCounterStopped(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -347,7 +356,7 @@ Java_edu_wpi_first_hal_CounterJNI_getCounterDirection
 {
   int32_t status = 0;
   jboolean returnValue =
-      HAL_GetCounterDirection((HAL_CounterHandle)id, &status);
+      HAL_GetCounterDirection(static_cast<HAL_CounterHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -362,7 +371,8 @@ Java_edu_wpi_first_hal_CounterJNI_setCounterReverseDirection
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetCounterReverseDirection((HAL_CounterHandle)id, value, &status);
+  HAL_SetCounterReverseDirection(static_cast<HAL_CounterHandle>(id), value,
+                                 &status);
   CheckStatus(env, status);
 }
 

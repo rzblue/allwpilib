@@ -59,7 +59,7 @@ Java_edu_wpi_first_hal_NotifierJNI_setNotifierName
   (JNIEnv* env, jclass cls, jint notifierHandle, jstring name)
 {
   int32_t status = 0;
-  HAL_SetNotifierName((HAL_NotifierHandle)notifierHandle,
+  HAL_SetNotifierName(static_cast<HAL_NotifierHandle>(notifierHandle),
                       wpi::java::JStringRef{env, name}.c_str(), &status);
   CheckStatus(env, status);
 }
@@ -74,7 +74,7 @@ Java_edu_wpi_first_hal_NotifierJNI_stopNotifier
   (JNIEnv* env, jclass cls, jint notifierHandle)
 {
   int32_t status = 0;
-  HAL_StopNotifier((HAL_NotifierHandle)notifierHandle, &status);
+  HAL_StopNotifier(static_cast<HAL_NotifierHandle>(notifierHandle), &status);
   CheckStatus(env, status);
 }
 
@@ -88,7 +88,7 @@ Java_edu_wpi_first_hal_NotifierJNI_cleanNotifier
   (JNIEnv* env, jclass, jint notifierHandle)
 {
   int32_t status = 0;
-  HAL_CleanNotifier((HAL_NotifierHandle)notifierHandle, &status);
+  HAL_CleanNotifier(static_cast<HAL_NotifierHandle>(notifierHandle), &status);
   CheckStatus(env, status);
 }
 
@@ -102,7 +102,7 @@ Java_edu_wpi_first_hal_NotifierJNI_updateNotifierAlarm
   (JNIEnv* env, jclass cls, jint notifierHandle, jlong triggerTime)
 {
   int32_t status = 0;
-  HAL_UpdateNotifierAlarm((HAL_NotifierHandle)notifierHandle,
+  HAL_UpdateNotifierAlarm(static_cast<HAL_NotifierHandle>(notifierHandle),
                           static_cast<uint64_t>(triggerTime), &status);
   CheckStatus(env, status);
 }
@@ -117,7 +117,8 @@ Java_edu_wpi_first_hal_NotifierJNI_cancelNotifierAlarm
   (JNIEnv* env, jclass cls, jint notifierHandle)
 {
   int32_t status = 0;
-  HAL_CancelNotifierAlarm((HAL_NotifierHandle)notifierHandle, &status);
+  HAL_CancelNotifierAlarm(static_cast<HAL_NotifierHandle>(notifierHandle),
+                          &status);
   CheckStatus(env, status);
 }
 
@@ -131,8 +132,8 @@ Java_edu_wpi_first_hal_NotifierJNI_waitForNotifierAlarm
   (JNIEnv* env, jclass cls, jint notifierHandle)
 {
   int32_t status = 0;
-  uint64_t time =
-      HAL_WaitForNotifierAlarm((HAL_NotifierHandle)notifierHandle, &status);
+  uint64_t time = HAL_WaitForNotifierAlarm(
+      static_cast<HAL_NotifierHandle>(notifierHandle), &status);
 
   CheckStatus(env, status);
 

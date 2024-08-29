@@ -30,8 +30,9 @@ Java_edu_wpi_first_hal_DIOJNI_initializeDIOPort
 {
   int32_t status = 0;
   auto stack = wpi::java::GetJavaStackTrace(env, "edu.wpi.first");
-  auto dio = HAL_InitializeDIOPort(
-      (HAL_PortHandle)id, static_cast<uint8_t>(input), stack.c_str(), &status);
+  auto dio = HAL_InitializeDIOPort(static_cast<HAL_PortHandle>(id),
+                                   static_cast<uint8_t>(input), stack.c_str(),
+                                   &status);
   CheckStatusForceThrow(env, status);
   return (jint)dio;
 }
@@ -57,7 +58,7 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_DIOJNI_freeDIOPort
   (JNIEnv* env, jclass, jint id)
 {
-  HAL_FreeDIOPort((HAL_DigitalHandle)id);
+  HAL_FreeDIOPort(static_cast<HAL_DigitalHandle>(id));
 }
 
 /*
@@ -69,7 +70,8 @@ JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_DIOJNI_setDIOSimDevice
   (JNIEnv* env, jclass, jint handle, jint device)
 {
-  HAL_SetDIOSimDevice((HAL_DigitalHandle)handle, (HAL_SimDeviceHandle)device);
+  HAL_SetDIOSimDevice(static_cast<HAL_DigitalHandle>(handle),
+                      static_cast<HAL_SimDeviceHandle>(device));
 }
 
 /*
@@ -82,7 +84,7 @@ Java_edu_wpi_first_hal_DIOJNI_setDIO
   (JNIEnv* env, jclass, jint id, jboolean value)
 {
   int32_t status = 0;
-  HAL_SetDIO((HAL_DigitalHandle)id, value, &status);
+  HAL_SetDIO(static_cast<HAL_DigitalHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -96,7 +98,7 @@ Java_edu_wpi_first_hal_DIOJNI_setDIODirection
   (JNIEnv* env, jclass, jint id, jboolean input)
 {
   int32_t status = 0;
-  HAL_SetDIODirection((HAL_DigitalHandle)id, input, &status);
+  HAL_SetDIODirection(static_cast<HAL_DigitalHandle>(id), input, &status);
   CheckStatus(env, status);
 }
 
@@ -110,7 +112,8 @@ Java_edu_wpi_first_hal_DIOJNI_getDIO
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean returnValue = HAL_GetDIO((HAL_DigitalHandle)id, &status);
+  jboolean returnValue =
+      HAL_GetDIO(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -125,7 +128,8 @@ Java_edu_wpi_first_hal_DIOJNI_getDIODirection
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean returnValue = HAL_GetDIODirection((HAL_DigitalHandle)id, &status);
+  jboolean returnValue =
+      HAL_GetDIODirection(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -140,7 +144,7 @@ Java_edu_wpi_first_hal_DIOJNI_pulse
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_Pulse((HAL_DigitalHandle)id, value, &status);
+  HAL_Pulse(static_cast<HAL_DigitalHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -168,7 +172,8 @@ Java_edu_wpi_first_hal_DIOJNI_isPulsing
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  jboolean returnValue = HAL_IsPulsing((HAL_DigitalHandle)id, &status);
+  jboolean returnValue =
+      HAL_IsPulsing(static_cast<HAL_DigitalHandle>(id), &status);
   CheckStatus(env, status);
   return returnValue;
 }
@@ -228,7 +233,7 @@ Java_edu_wpi_first_hal_DIOJNI_freeDigitalPWM
   (JNIEnv* env, jclass, jint id)
 {
   int32_t status = 0;
-  HAL_FreeDigitalPWM((HAL_DigitalPWMHandle)id, &status);
+  HAL_FreeDigitalPWM(static_cast<HAL_DigitalPWMHandle>(id), &status);
   CheckStatus(env, status);
 }
 
@@ -256,7 +261,8 @@ Java_edu_wpi_first_hal_DIOJNI_setDigitalPWMDutyCycle
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetDigitalPWMDutyCycle((HAL_DigitalPWMHandle)id, value, &status);
+  HAL_SetDigitalPWMDutyCycle(static_cast<HAL_DigitalPWMHandle>(id), value,
+                             &status);
   CheckStatus(env, status);
 }
 
@@ -270,7 +276,7 @@ Java_edu_wpi_first_hal_DIOJNI_setDigitalPWMPPS
   (JNIEnv* env, jclass, jint id, jdouble value)
 {
   int32_t status = 0;
-  HAL_SetDigitalPWMPPS((HAL_DigitalPWMHandle)id, value, &status);
+  HAL_SetDigitalPWMPPS(static_cast<HAL_DigitalPWMHandle>(id), value, &status);
   CheckStatus(env, status);
 }
 
@@ -284,7 +290,7 @@ Java_edu_wpi_first_hal_DIOJNI_setDigitalPWMOutputChannel
   (JNIEnv* env, jclass, jint id, jint value)
 {
   int32_t status = 0;
-  HAL_SetDigitalPWMOutputChannel((HAL_DigitalPWMHandle)id,
+  HAL_SetDigitalPWMOutputChannel(static_cast<HAL_DigitalPWMHandle>(id),
                                  static_cast<uint32_t>(value), &status);
   CheckStatus(env, status);
 }
