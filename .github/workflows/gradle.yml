@@ -33,6 +33,8 @@ jobs:
         run: echo ${{ github.run_number }}
       - name: Output Run Attempt
         run: echo ${{ github.run_attempt }}
+      - name: Output job ID
+        run: echo ${{ github.job }}
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@main
         with:
