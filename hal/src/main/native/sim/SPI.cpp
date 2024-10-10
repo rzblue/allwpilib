@@ -40,10 +40,6 @@ HAL_SPIMode HAL_GetSPIMode(HAL_SPIPort port) {
 }
 void HAL_SetSPIChipSelectActiveHigh(HAL_SPIPort port, int32_t* status) {}
 void HAL_SetSPIChipSelectActiveLow(HAL_SPIPort port, int32_t* status) {}
-int32_t HAL_GetSPIHandle(HAL_SPIPort port) {
-  return 0;
-}
-void HAL_SetSPIHandle(HAL_SPIPort port, int32_t handle) {}
 
 void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {}
 void HAL_FreeSPIAuto(HAL_SPIPort port, int32_t* status) {}
