@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include <string>
 
 #include <fmt/format.h>
 #include <wpi/mutex.h>
@@ -25,21 +26,35 @@
 #include "hal/DIO.h"
 #include "hal/HAL.h"
 #include "hal/handles/HandlesInternal.h"
+#include "hal/handles/IndexedHandleResource.h"
 
 using namespace hal;
 
-static int32_t m_spiCS0Handle{0};
-static int32_t m_spiCS1Handle{0};
-static int32_t m_spiCS2Handle{0};
-static int32_t m_spiCS3Handle{0};
-static int32_t m_spiMXPHandle{0};
+namespace {
+struct SPI {
+  int32_t nativeHandle;
+  wpi::mutex handleMutex;
+  wpi::mutex apiMutex;
+  wpi::mutex accumulatorMutex;
 
+  std::string previousAllocation;
+};
+}  // namespace
 static constexpr int32_t kSpiMaxHandles = 5;
 
-// Indices 0-3 are for onboard CS0-CS2. Index 4 is for MXP.
-static std::array<wpi::mutex, kSpiMaxHandles> spiHandleMutexes;
-static std::array<wpi::mutex, kSpiMaxHandles> spiApiMutexes;
-static std::array<wpi::mutex, kSpiMaxHandles> spiAccumulatorMutexes;
+/// Hacky hacky bad, should probably switch HAL api to use handles instead of
+/// this
+class SPIHandleResource
+    : public IndexedHandleResource<HAL_Handle, SPI, kSpiMaxHandles,
+                                   HAL_HandleEnum::SPI> {
+ public:
+  HAL_Handle GetHandleForPort(HAL_SPIPort port) {
+    return createHandle(static_cast<int16_t>(port), HAL_HandleEnum::SPI,
+                        m_version);
+  }
+};
+
+static SPIHandleResource* spiHandles;
 
 // MXP SPI does not count towards this
 static std::atomic<int32_t> spiPortCount{0};
@@ -64,7 +79,10 @@ static bool SPIInUseByAuto(HAL_SPIPort port) {
 }
 
 namespace hal::init {
-void InitializeSPI() {}
+void InitializeSPI() {
+  static SPIHandleResource sH;
+  spiHandles = &sH;
+}
 }  // namespace hal::init
 
 extern "C" {
@@ -114,10 +132,15 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
     return;
   }
 
-  int handle;
-  if (HAL_GetSPIHandle(port) != 0) {
+  HAL_Handle hal_handle;
+  auto spi =
+      spiHandles->Allocate(static_cast<int16_t>(port), &hal_handle, status);
+
+  if (status != 0) {
+    *status = RESOURCE_IS_ALLOCATED;  // todo: previous allocation;
     return;
   }
+
   switch (port) {
     case HAL_SPI_kOnboardCS0:
       CommonSPIPortInit(status);
@@ -125,14 +148,15 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
         return;
       }
       // CS0 is not a DIO port, so nothing to allocate
-      handle = open("/dev/spidev0.0", O_RDWR);
-      if (handle < 0) {
+      spi->nativeHandle = open("/dev/spidev0.0", O_RDWR);
+      if (spi->nativeHandle < 0) {
         wpi::print("Failed to open SPI port {}: {}\n",
                    static_cast<int32_t>(port), std::strerror(errno));
         CommonSPIPortFree();
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      HAL_SetSPIHandle(HAL_SPI_kOnboardCS0, handle);
       break;
     case HAL_SPI_kOnboardCS1:
       CommonSPIPortInit(status);
@@ -145,17 +169,20 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
           HAL_kInvalidHandle) {
         std::puts("Failed to allocate DIO 26 (CS1)");
         CommonSPIPortFree();
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      handle = open("/dev/spidev0.1", O_RDWR);
-      if (handle < 0) {
+      spi->nativeHandle = open("/dev/spidev0.1", O_RDWR);
+      if (spi->nativeHandle < 0) {
         wpi::print("Failed to open SPI port {}: {}\n",
                    static_cast<int32_t>(port), std::strerror(errno));
         CommonSPIPortFree();
         HAL_FreeDIOPort(digitalHandles[0]);
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      HAL_SetSPIHandle(HAL_SPI_kOnboardCS1, handle);
       break;
     case HAL_SPI_kOnboardCS2:
       CommonSPIPortInit(status);
@@ -170,15 +197,16 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
         CommonSPIPortFree();
         return;
       }
-      handle = open("/dev/spidev0.2", O_RDWR);
-      if (handle < 0) {
+      spi->nativeHandle = open("/dev/spidev0.2", O_RDWR);
+      if (spi->nativeHandle < 0) {
         wpi::print("Failed to open SPI port {}: {}\n",
                    static_cast<int32_t>(port), std::strerror(errno));
         CommonSPIPortFree();
         HAL_FreeDIOPort(digitalHandles[1]);
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      HAL_SetSPIHandle(HAL_SPI_kOnboardCS2, handle);
       break;
     case HAL_SPI_kOnboardCS3:
       CommonSPIPortInit(status);
@@ -193,15 +221,16 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
         CommonSPIPortFree();
         return;
       }
-      handle = open("/dev/spidev0.3", O_RDWR);
-      if (handle < 0) {
+      spi->nativeHandle = open("/dev/spidev0.3", O_RDWR);
+      if (spi->nativeHandle < 0) {
         wpi::print("Failed to open SPI port {}: {}\n",
                    static_cast<int32_t>(port), std::strerror(errno));
         CommonSPIPortFree();
         HAL_FreeDIOPort(digitalHandles[2]);
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      HAL_SetSPIHandle(HAL_SPI_kOnboardCS3, handle);
       break;
     case HAL_SPI_kMXP:
       initializeDigital(status);
@@ -240,19 +269,21 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
       }
       digitalSystem->writeEnableMXPSpecialFunction(
           digitalSystem->readEnableMXPSpecialFunction(status) | 0x00F0, status);
-      handle = open("/dev/spidev1.0", O_RDWR);
-      if (handle < 0) {
+      spi->nativeHandle = open("/dev/spidev1.0", O_RDWR);
+      if (spi->nativeHandle < 0) {
         wpi::print("Failed to open SPI port {}: {}\n",
                    static_cast<int32_t>(port), std::strerror(errno));
         HAL_FreeDIOPort(digitalHandles[5]);  // free the first port allocated
         HAL_FreeDIOPort(digitalHandles[6]);  // free the second port allocated
         HAL_FreeDIOPort(digitalHandles[7]);  // free the third port allocated
         HAL_FreeDIOPort(digitalHandles[8]);  // free the fourth port allocated
+        spiHandles->Free(hal_handle);
+        *status = INCOMPATIBLE_STATE;
         return;
       }
-      HAL_SetSPIHandle(HAL_SPI_kMXP, handle);
       break;
     default:
+      // TODO: should be unreachable
       *status = PARAMETER_OUT_OF_RANGE;
       hal::SetLastError(
           status, fmt::format("Invalid SPI port {}", static_cast<int>(port)));
@@ -262,7 +293,8 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
 
 int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return -1;
   }
 
@@ -276,13 +308,14 @@ int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
   xfer.rx_buf = (__u64)dataReceived;
   xfer.len = size;
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  return ioctl(HAL_GetSPIHandle(port), SPI_IOC_MESSAGE(1), &xfer);
+  std::scoped_lock lock(spi->apiMutex);
+  return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
 int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
                      int32_t sendSize) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return -1;
   }
 
@@ -295,12 +328,13 @@ int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
   xfer.tx_buf = (__u64)dataToSend;
   xfer.len = sendSize;
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  return ioctl(HAL_GetSPIHandle(port), SPI_IOC_MESSAGE(1), &xfer);
+  std::scoped_lock lock(spi->apiMutex);
+  return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
 int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return -1;
   }
 
@@ -313,12 +347,13 @@ int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
   xfer.rx_buf = (__u64)buffer;
   xfer.len = count;
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  return ioctl(HAL_GetSPIHandle(port), SPI_IOC_MESSAGE(1), &xfer);
+  std::scoped_lock lock(spi->apiMutex);
+  return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
 void HAL_CloseSPI(HAL_SPIPort port) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return;
   }
 
@@ -326,11 +361,10 @@ void HAL_CloseSPI(HAL_SPIPort port) {
   HAL_FreeSPIAuto(port, &status);
 
   {
-    std::scoped_lock lock(spiApiMutexes[port]);
-    close(HAL_GetSPIHandle(port));
+    std::scoped_lock lock(spi->apiMutex);
+    close(spi->nativeHandle);
   }
 
-  HAL_SetSPIHandle(port, 0);
   if (port < 4) {
     CommonSPIPortFree();
   }
@@ -355,37 +389,41 @@ void HAL_CloseSPI(HAL_SPIPort port) {
     default:
       break;
   }
+  spiHandles->Free(spiHandles->GetHandleForPort(port));
 }
 
 void HAL_SetSPISpeed(HAL_SPIPort port, int32_t speed) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return;
   }
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  ioctl(HAL_GetSPIHandle(port), SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+  std::scoped_lock lock(spi->apiMutex);
+  ioctl(spi->nativeHandle, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
 }
 
 void HAL_SetSPIMode(HAL_SPIPort port, HAL_SPIMode mode) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return;
   }
 
   uint8_t mode8 = mode & SPI_MODE_3;
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  ioctl(HAL_GetSPIHandle(port), SPI_IOC_WR_MODE, &mode8);
+  std::scoped_lock lock(spi->apiMutex);
+  ioctl(spi->nativeHandle, SPI_IOC_WR_MODE, &mode8);
 }
 
 HAL_SPIMode HAL_GetSPIMode(HAL_SPIPort port) {
-  if (port < 0 || port >= kSpiMaxHandles) {
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  if (!spi) {
     return HAL_SPI_kMode0;
   }
 
   uint8_t mode8 = 0;
 
-  std::scoped_lock lock(spiApiMutexes[port]);
-  ioctl(HAL_GetSPIHandle(port), SPI_IOC_RD_MODE, &mode8);
+  std::scoped_lock lock(spi->apiMutex);
+  ioctl(spi->nativeHandle, SPI_IOC_RD_MODE, &mode8);
   return static_cast<HAL_SPIMode>(mode8 & SPI_MODE_3);
 }
 
@@ -399,7 +437,14 @@ void HAL_SetSPIChipSelectActiveHigh(HAL_SPIPort port, int32_t* status) {
     return;
   }
 
-  std::scoped_lock lock(spiApiMutexes[port]);
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(
+      port));  // TODO: consolidate with above check
+  if (!spi) {
+    *status = INCOMPATIBLE_STATE;
+    return;
+  }
+
+  std::scoped_lock lock(spi->apiMutex);
   if (port < 4) {
     spiSystem->writeChipSelectActiveHigh_Hdr(
         spiSystem->readChipSelectActiveHigh_Hdr(status) | (1 << port), status);
@@ -418,61 +463,18 @@ void HAL_SetSPIChipSelectActiveLow(HAL_SPIPort port, int32_t* status) {
     return;
   }
 
-  std::scoped_lock lock(spiApiMutexes[port]);
+  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(
+      port));  // TODO: consolidate with above check
+  if (!spi) {
+    return;
+  }
+
+  std::scoped_lock lock(spi->apiMutex);
   if (port < 4) {
     spiSystem->writeChipSelectActiveHigh_Hdr(
         spiSystem->readChipSelectActiveHigh_Hdr(status) & ~(1 << port), status);
   } else {
     spiSystem->writeChipSelectActiveHigh_MXP(0, status);
-  }
-}
-
-int32_t HAL_GetSPIHandle(HAL_SPIPort port) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    return 0;
-  }
-
-  std::scoped_lock lock(spiHandleMutexes[port]);
-  switch (port) {
-    case 0:
-      return m_spiCS0Handle;
-    case 1:
-      return m_spiCS1Handle;
-    case 2:
-      return m_spiCS2Handle;
-    case 3:
-      return m_spiCS3Handle;
-    case 4:
-      return m_spiMXPHandle;
-    default:
-      return 0;
-  }
-}
-
-void HAL_SetSPIHandle(HAL_SPIPort port, int32_t handle) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    return;
-  }
-
-  std::scoped_lock lock(spiHandleMutexes[port]);
-  switch (port) {
-    case 0:
-      m_spiCS0Handle = handle;
-      break;
-    case 1:
-      m_spiCS1Handle = handle;
-      break;
-    case 2:
-      m_spiCS2Handle = handle;
-      break;
-    case 3:
-      m_spiCS3Handle = handle;
-      break;
-    case 4:
-      m_spiMXPHandle = handle;
-      break;
-    default:
-      break;
   }
 }
 
@@ -483,6 +485,12 @@ void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {
         status,
         fmt::format("Serial port must be between 0 and {}. Requested {}",
                     kSpiMaxHandles, static_cast<int>(port)));
+    return;
+  }
+
+  if (!spiHandles->Get(spiHandles->GetHandleForPort(
+          port))) {  // TODO: consolidate with above check
+    *status = INCOMPATIBLE_STATE;
     return;
   }
 
@@ -517,6 +525,12 @@ void HAL_FreeSPIAuto(HAL_SPIPort port, int32_t* status) {
         status,
         fmt::format("Serial port must be between 0 and {}. Requested {}",
                     kSpiMaxHandles, static_cast<int>(port)));
+    return;
+  }
+
+  if (!spiHandles->Get(spiHandles->GetHandleForPort(
+          port))) {  // TODO: consolidate with above check
+    *status = INCOMPATIBLE_STATE;
     return;
   }
 
