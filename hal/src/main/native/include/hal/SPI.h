@@ -131,24 +131,6 @@ void HAL_SetSPIChipSelectActiveHigh(HAL_SPIPort port, int32_t* status);
 void HAL_SetSPIChipSelectActiveLow(HAL_SPIPort port, int32_t* status);
 
 /**
- * Gets the stored handle for a SPI port.
- *
- * @param port The number of the port to use. 0-3 for Onboard CS0-CS2, 4 for MXP
- * @return The stored handle for the SPI port. 0 represents no stored
- *         handle.
- */
-int32_t HAL_GetSPIHandle(HAL_SPIPort port);
-
-/**
- * Sets the stored handle for a SPI port.
- *
- * @param port   The number of the port to use. 0-3 for Onboard CS0-CS2, 4 for
- *               MXP.
- * @param handle The value of the handle for the port.
- */
-void HAL_SetSPIHandle(HAL_SPIPort port, int32_t handle);
-
-/**
  * Initializes the SPI automatic accumulator.
  *
  * @param[in] port       The number of the port to use. 0-3 for Onboard CS0-CS2,
