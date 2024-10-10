@@ -125,9 +125,8 @@ void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   if (port < 0 || port >= kSpiMaxHandles) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
-        status,
-        fmt::format("Serial port must be between 0 and {}. Requested {}",
-                    kSpiMaxHandles, static_cast<int>(port)));
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
     return;
   }
 
@@ -430,9 +429,8 @@ void HAL_SetSPIChipSelectActiveHigh(HAL_SPIPort port, int32_t* status) {
   if (port < 0 || port >= kSpiMaxHandles) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
-        status,
-        fmt::format("Serial port must be between 0 and {}. Requested {}",
-                    kSpiMaxHandles, static_cast<int>(port)));
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
     return;
   }
 
@@ -456,9 +454,8 @@ void HAL_SetSPIChipSelectActiveLow(HAL_SPIPort port, int32_t* status) {
   if (port < 0 || port >= kSpiMaxHandles) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
-        status,
-        fmt::format("Serial port must be between 0 and {}. Requested {}",
-                    kSpiMaxHandles, static_cast<int>(port)));
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
     return;
   }
 
@@ -481,9 +478,8 @@ void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {
   if (port < 0 || port >= kSpiMaxHandles) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
-        status,
-        fmt::format("Serial port must be between 0 and {}. Requested {}",
-                    kSpiMaxHandles, static_cast<int>(port)));
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
     return;
   }
 
@@ -521,9 +517,8 @@ void HAL_FreeSPIAuto(HAL_SPIPort port, int32_t* status) {
   if (port < 0 || port >= kSpiMaxHandles) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
-        status,
-        fmt::format("Serial port must be between 0 and {}. Requested {}",
-                    kSpiMaxHandles, static_cast<int>(port)));
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
     return;
   }
 
