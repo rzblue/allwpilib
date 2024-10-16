@@ -70,6 +70,8 @@ typedef HAL_Handle HAL_REVPDHHandle;
 
 typedef HAL_Handle HAL_REVPHHandle;
 
+typedef HAL_Handle HAL_SPIHandle;
+
 typedef int32_t HAL_Bool;
 
 #ifdef __cplusplus

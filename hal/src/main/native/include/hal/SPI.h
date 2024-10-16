@@ -30,7 +30,7 @@ extern "C" {
  * @param[in] port    The port to initialize.
  * @param[out] status the error code, or 0 for success.
  */
-void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status);
+HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status);
 
 /**
  * Performs an SPI send/receive transaction.
