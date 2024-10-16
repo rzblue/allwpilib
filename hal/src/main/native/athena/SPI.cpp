@@ -280,8 +280,8 @@ HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   auto spi =
       spiHandles->Allocate(static_cast<int16_t>(port), &hal_handle, status);
 
-  if (status != 0) {
-    *status = RESOURCE_IS_ALLOCATED;  // todo: previous allocation;
+  if (*status != 0) {
+    // todo: previous allocation;
     return HAL_kInvalidHandle;
   }
 
@@ -319,14 +319,14 @@ HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   return hal_handle;
 }
 
-int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
+int32_t HAL_TransactionSPI(HAL_SPIHandle handle, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return -1;
   }
 
-  if (SPIInUseByAuto(port)) {
+  if (SPIInUseByAuto(spi->port)) {
     return -1;
   }
 
