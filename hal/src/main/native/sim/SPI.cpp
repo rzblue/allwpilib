@@ -15,9 +15,11 @@ void InitializeSPI() {}
 
 extern "C" {
 
-void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
+HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   hal::init::CheckInit();
   SimSPIData[port].initialized = true;
+  // TODO: deal with this
+  return 0;
 }
 int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size) {
