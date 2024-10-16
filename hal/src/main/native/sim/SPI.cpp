@@ -6,25 +6,66 @@
 
 #include "HALInitializer.h"
 #include "mockdata/SPIDataInternal.h"
-
+#include "hal/handles/IndexedHandleResource.h"
+#include "HALInternal.h"
+#include <fmt/format.h>
 using namespace hal;
 
+namespace {
+struct SPI {
+  HAL_SPIPort port;
+};
+}  // namespace
+
+static constexpr int32_t kSpiMaxHandles = 5;
+
+typedef IndexedHandleResource<HAL_SPIHandle, SPI, kSpiMaxHandles,
+                              HAL_HandleEnum::SPI>
+    SPIHandleResource;
+
+static SPIHandleResource* spiHandles;
+
 namespace hal::init {
-void InitializeSPI() {}
+void InitializeSPI() {
+  static SPIHandleResource sH;
+  spiHandles = &sH;
+}
 }  // namespace hal::init
 
 extern "C" {
 
 HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   hal::init::CheckInit();
+  if (port < 0 || port >= kSpiMaxHandles) {
+    *status = PARAMETER_OUT_OF_RANGE;
+    hal::SetLastError(
+        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
+                            kSpiMaxHandles, static_cast<int>(port)));
+    return HAL_kInvalidHandle;
+  }
+
+  HAL_SPIHandle hal_handle;
+  auto spi =
+      spiHandles->Allocate(static_cast<int16_t>(port), &hal_handle, status);
+
+  if (*status != 0) {
+    return HAL_kInvalidHandle;
+  }
+
   SimSPIData[port].initialized = true;
-  // TODO: deal with this
-  return 0;
+  spi->port = port;
+  return hal_handle;
 }
-int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
+
+int32_t HAL_TransactionSPI(HAL_SPIHandle handle, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size) {
-  return SimSPIData[port].Transaction(dataToSend, dataReceived, size);
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    return -1;
+  }
+  return SimSPIData[spi->port].Transaction(dataToSend, dataReceived, size);
 }
+
 int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
                      int32_t sendSize) {
   return SimSPIData[port].Write(dataToSend, sendSize);
@@ -32,8 +73,13 @@ int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
 int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
   return SimSPIData[port].Read(buffer, count);
 }
-void HAL_CloseSPI(HAL_SPIPort port) {
-  SimSPIData[port].initialized = false;
+void HAL_CloseSPI(HAL_SPIHandle handle) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    return;
+  }
+  SimSPIData[spi->port].initialized = false;
+  spiHandles->Free(handle);
 }
 void HAL_SetSPISpeed(HAL_SPIPort port, int32_t speed) {}
 void HAL_SetSPIMode(HAL_SPIPort port, HAL_SPIMode mode) {}

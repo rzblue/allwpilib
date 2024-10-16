@@ -379,25 +379,25 @@ int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
   return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
-void HAL_CloseSPI(HAL_SPIPort port) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+void HAL_CloseSPI(HAL_SPIHandle handle) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return;
   }
 
   int32_t status = 0;
-  HAL_FreeSPIAuto(port, &status);
+  HAL_FreeSPIAuto(spi->port, &status);
 
   {
     std::scoped_lock lock(spi->apiMutex);
     close(spi->nativeHandle);
   }
 
-  if (port < 4) {
+  if (spi->port < 4) {
     CommonSPIPortFree();
   }
 
-  switch (port) {
+  switch (spi->port) {
     // Case 0 does not need to do anything
     case 1:
       HAL_FreeDIOPort(digitalHandles[0]);
@@ -417,7 +417,7 @@ void HAL_CloseSPI(HAL_SPIPort port) {
     default:
       break;
   }
-  spiHandles->Free(spiHandles->GetHandleForPort(port));
+  spiHandles->Free(handle);
 }
 
 void HAL_SetSPISpeed(HAL_SPIPort port, int32_t speed) {

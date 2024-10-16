@@ -45,7 +45,7 @@ HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status);
  * @param size         Number of bytes to transfer. [0..7]
  * @return Number of bytes transferred, -1 for error
  */
-int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
+int32_t HAL_TransactionSPI(HAL_SPIHandle port, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size);
 
 /**
@@ -82,9 +82,9 @@ int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count);
 /**
  * Closes the SPI port.
  *
- * @param port The number of the port to use. 0-3 for Onboard CS0-CS2, 4 for MXP
+ * @param handle The port handle.
  */
-void HAL_CloseSPI(HAL_SPIPort port);
+void HAL_CloseSPI(HAL_SPIHandle handle);
 
 /**
  * Sets the clock speed for the SPI bus.
