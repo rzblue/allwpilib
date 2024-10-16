@@ -21,13 +21,14 @@ extern "C" {
 #endif
 
 /**
- * Initializes the SPI port. Opens the port if necessary and saves the handle.
+ * Initializes the SPI port and returns a handle.
  *
  * If opening the MXP port, also sets up the channel functions appropriately.
+ * TODO: \@thad what does this mean? Is this just DIO 14-17 being reserved for
+ * SPI?
  *
- * @param[in] port    The number of the port to use. 0-3 for Onboard CS0-CS3, 4
- *                    for MXP
- * @param[out] status the error code, or 0 for success
+ * @param[in] port    The port to initialize.
+ * @param[out] status the error code, or 0 for success.
  */
 void HAL_InitializeSPI(HAL_SPIPort port, int32_t* status);
 
