@@ -320,14 +320,14 @@ HAL_SPIHandle HAL_InitializeSPI(HAL_SPIPort port, int32_t* status) {
   return hal_handle;
 }
 
-int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
+int32_t HAL_TransactionSPI(HAL_SPIHandle handle, const uint8_t* dataToSend,
                            uint8_t* dataReceived, int32_t size) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return -1;
   }
 
-  if (SPIInUseByAuto(port)) {
+  if (SPIInUseByAuto(spi->port)) {
     return -1;
   }
 
@@ -341,14 +341,14 @@ int32_t HAL_TransactionSPI(HAL_SPIPort port, const uint8_t* dataToSend,
   return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
-int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
+int32_t HAL_WriteSPI(HAL_SPIHandle handle, const uint8_t* dataToSend,
                      int32_t sendSize) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return -1;
   }
 
-  if (SPIInUseByAuto(port)) {
+  if (SPIInUseByAuto(spi->port)) {
     return -1;
   }
 
@@ -361,13 +361,13 @@ int32_t HAL_WriteSPI(HAL_SPIPort port, const uint8_t* dataToSend,
   return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
-int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+int32_t HAL_ReadSPI(HAL_SPIHandle handle, uint8_t* buffer, int32_t count) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return -1;
   }
 
-  if (SPIInUseByAuto(port)) {
+  if (SPIInUseByAuto(spi->port)) {
     return -1;
   }
 
@@ -380,25 +380,25 @@ int32_t HAL_ReadSPI(HAL_SPIPort port, uint8_t* buffer, int32_t count) {
   return ioctl(spi->nativeHandle, SPI_IOC_MESSAGE(1), &xfer);
 }
 
-void HAL_CloseSPI(HAL_SPIPort port) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+void HAL_CloseSPI(HAL_SPIHandle handle) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return;
   }
 
   int32_t status = 0;
-  HAL_FreeSPIAuto(port, &status);
+  HAL_FreeSPIAuto(spi->port, &status);
 
   {
     std::scoped_lock lock(spi->apiMutex);
     close(spi->nativeHandle);
   }
 
-  if (port < 4) {
+  if (spi->port < 4) {
     CommonSPIPortFree();
   }
 
-  switch (port) {
+  switch (spi->port) {
     // Case 0 does not need to do anything
     case 1:
       HAL_FreeDIOPort(digitalHandles[0]);
@@ -418,11 +418,11 @@ void HAL_CloseSPI(HAL_SPIPort port) {
     default:
       break;
   }
-  spiHandles->Free(spiHandles->GetHandleForPort(port));
+  spiHandles->Free(handle);
 }
 
-void HAL_SetSPISpeed(HAL_SPIPort port, int32_t speed) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+void HAL_SetSPISpeed(HAL_SPIHandle handle, int32_t speed) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return;
   }
@@ -431,8 +431,8 @@ void HAL_SetSPISpeed(HAL_SPIPort port, int32_t speed) {
   ioctl(spi->nativeHandle, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
 }
 
-void HAL_SetSPIMode(HAL_SPIPort port, HAL_SPIMode mode) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+void HAL_SetSPIMode(HAL_SPIHandle handle, HAL_SPIMode mode) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return;
   }
@@ -443,8 +443,8 @@ void HAL_SetSPIMode(HAL_SPIPort port, HAL_SPIMode mode) {
   ioctl(spi->nativeHandle, SPI_IOC_WR_MODE, &mode8);
 }
 
-HAL_SPIMode HAL_GetSPIMode(HAL_SPIPort port) {
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(port));
+HAL_SPIMode HAL_GetSPIMode(HAL_SPIHandle handle) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
     return HAL_SPI_kMode0;
   }
@@ -456,67 +456,45 @@ HAL_SPIMode HAL_GetSPIMode(HAL_SPIPort port) {
   return static_cast<HAL_SPIMode>(mode8 & SPI_MODE_3);
 }
 
-void HAL_SetSPIChipSelectActiveHigh(HAL_SPIPort port, int32_t* status) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    *status = PARAMETER_OUT_OF_RANGE;
-    hal::SetLastError(
-        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
-                            kSpiMaxHandles, static_cast<int>(port)));
-    return;
-  }
-
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(
-      port));  // TODO: consolidate with above check
+void HAL_SetSPIChipSelectActiveHigh(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
-    *status = INCOMPATIBLE_STATE;
+    *status = HAL_HANDLE_ERROR;
     return;
   }
 
   std::scoped_lock lock(spi->apiMutex);
-  if (port < 4) {
+  if (spi->port < 4) {
     spiSystem->writeChipSelectActiveHigh_Hdr(
-        spiSystem->readChipSelectActiveHigh_Hdr(status) | (1 << port), status);
+        spiSystem->readChipSelectActiveHigh_Hdr(status) | (1 << spi->port),
+        status);
   } else {
     spiSystem->writeChipSelectActiveHigh_MXP(1, status);
   }
 }
 
-void HAL_SetSPIChipSelectActiveLow(HAL_SPIPort port, int32_t* status) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    *status = PARAMETER_OUT_OF_RANGE;
-    hal::SetLastError(
-        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
-                            kSpiMaxHandles, static_cast<int>(port)));
-    return;
-  }
-
-  auto spi = spiHandles->Get(spiHandles->GetHandleForPort(
-      port));  // TODO: consolidate with above check
+void HAL_SetSPIChipSelectActiveLow(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
   if (!spi) {
+    *status = HAL_HANDLE_ERROR;
     return;
   }
 
   std::scoped_lock lock(spi->apiMutex);
-  if (port < 4) {
+  if (spi->port < 4) {
     spiSystem->writeChipSelectActiveHigh_Hdr(
-        spiSystem->readChipSelectActiveHigh_Hdr(status) & ~(1 << port), status);
+        spiSystem->readChipSelectActiveHigh_Hdr(status) & ~(1 << spi->port),
+        status);
   } else {
     spiSystem->writeChipSelectActiveHigh_MXP(0, status);
   }
 }
 
-void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    *status = PARAMETER_OUT_OF_RANGE;
-    hal::SetLastError(
-        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
-                            kSpiMaxHandles, static_cast<int>(port)));
-    return;
-  }
-
-  if (!spiHandles->Get(spiHandles->GetHandleForPort(
-          port))) {  // TODO: consolidate with above check
-    *status = INCOMPATIBLE_STATE;
+void HAL_InitSPIAuto(HAL_SPIHandle handle, int32_t bufferSize,
+                     int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
     return;
   }
 
@@ -528,12 +506,12 @@ void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {
   }
 
   // remember the initialized port for other entry points
-  spiAutoPort = port;
+  spiAutoPort = spi->port;
 
   // configure the correct chip select
-  if (port < 4) {
+  if (spi->port < 4) {
     spiSystem->writeAutoSPI1Select(false, status);
-    spiSystem->writeAutoChipSelect(port, status);
+    spiSystem->writeAutoChipSelect(spi->port, status);
   } else {
     spiSystem->writeAutoSPI1Select(true, status);
     spiSystem->writeAutoChipSelect(0, status);
@@ -544,23 +522,15 @@ void HAL_InitSPIAuto(HAL_SPIPort port, int32_t bufferSize, int32_t* status) {
       std::make_unique<tDMAManager>(g_SpiAutoData_index, bufferSize, status);
 }
 
-void HAL_FreeSPIAuto(HAL_SPIPort port, int32_t* status) {
-  if (port < 0 || port >= kSpiMaxHandles) {
-    *status = PARAMETER_OUT_OF_RANGE;
-    hal::SetLastError(
-        status, fmt::format("SPI port must be between 0 and {}. Requested {}",
-                            kSpiMaxHandles, static_cast<int>(port)));
-    return;
-  }
-
-  if (!spiHandles->Get(spiHandles->GetHandleForPort(
-          port))) {  // TODO: consolidate with above check
-    *status = INCOMPATIBLE_STATE;
+void HAL_FreeSPIAuto(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
     return;
   }
 
   std::scoped_lock lock(spiAutoMutex);
-  if (spiAutoPort != port) {
+  if (spiAutoPort != spi->port) {
     return;
   }
   spiAutoPort = kSpiMaxHandles;
@@ -577,10 +547,17 @@ void HAL_FreeSPIAuto(HAL_SPIPort port, int32_t* status) {
   spiAutoRunning = false;
 }
 
-void HAL_StartSPIAutoRate(HAL_SPIPort port, double period, int32_t* status) {
+void HAL_StartSPIAutoRate(HAL_SPIHandle handle, double period,
+                          int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }
@@ -597,13 +574,20 @@ void HAL_StartSPIAutoRate(HAL_SPIPort port, double period, int32_t* status) {
   spiSystem->writeAutoTriggerConfig_ExternalClock(false, status);
 }
 
-void HAL_StartSPIAutoTrigger(HAL_SPIPort port, HAL_Handle digitalSourceHandle,
+void HAL_StartSPIAutoTrigger(HAL_SPIHandle handle,
+                             HAL_Handle digitalSourceHandle,
                              HAL_AnalogTriggerType analogTriggerType,
                              HAL_Bool triggerRising, HAL_Bool triggerFalling,
                              int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }
@@ -635,10 +619,16 @@ void HAL_StartSPIAutoTrigger(HAL_SPIPort port, HAL_Handle digitalSourceHandle,
   spiSystem->writeAutoTriggerConfig(config, status);
 }
 
-void HAL_StopSPIAuto(HAL_SPIPort port, int32_t* status) {
+void HAL_StopSPIAuto(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }
@@ -653,9 +643,16 @@ void HAL_StopSPIAuto(HAL_SPIPort port, int32_t* status) {
   spiAutoRunning = false;
 }
 
-void HAL_SetSPIAutoTransmitData(HAL_SPIPort port, const uint8_t* dataToSend,
+void HAL_SetSPIAutoTransmitData(HAL_SPIHandle handle, const uint8_t* dataToSend,
                                 int32_t dataSize, int32_t zeroSize,
                                 int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
+
+  // todo: use the setlasterror out of range method for this
   if (dataSize < 0 || dataSize > 32) {
     *status = PARAMETER_OUT_OF_RANGE;
     hal::SetLastError(
@@ -678,7 +675,7 @@ void HAL_SetSPIAutoTransmitData(HAL_SPIPort port, const uint8_t* dataToSend,
 
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }
@@ -695,10 +692,16 @@ void HAL_SetSPIAutoTransmitData(HAL_SPIPort port, const uint8_t* dataToSend,
   spiSystem->writeAutoByteCount(config, status);
 }
 
-void HAL_ForceSPIAutoRead(HAL_SPIPort port, int32_t* status) {
+void HAL_ForceSPIAutoRead(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }
@@ -706,12 +709,18 @@ void HAL_ForceSPIAutoRead(HAL_SPIPort port, int32_t* status) {
   spiSystem->strobeAutoForceOne(status);
 }
 
-int32_t HAL_ReadSPIAutoReceivedData(HAL_SPIPort port, uint32_t* buffer,
+int32_t HAL_ReadSPIAutoReceivedData(HAL_SPIHandle handle, uint32_t* buffer,
                                     int32_t numToRead, double timeout,
                                     int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return 0;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return 0;
   }
@@ -722,10 +731,16 @@ int32_t HAL_ReadSPIAutoReceivedData(HAL_SPIPort port, uint32_t* buffer,
   return numRemaining;
 }
 
-int32_t HAL_GetSPIAutoDroppedCount(HAL_SPIPort port, int32_t* status) {
+int32_t HAL_GetSPIAutoDroppedCount(HAL_SPIHandle handle, int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return 0;
+  }
+
   std::scoped_lock lock(spiAutoMutex);
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return 0;
   }
@@ -733,12 +748,18 @@ int32_t HAL_GetSPIAutoDroppedCount(HAL_SPIPort port, int32_t* status) {
   return spiSystem->readTransferSkippedFullCount(status);
 }
 
-void HAL_ConfigureSPIAutoStall(HAL_SPIPort port, int32_t csToSclkTicks,
+void HAL_ConfigureSPIAutoStall(HAL_SPIHandle handle, int32_t csToSclkTicks,
                                int32_t stallTicks, int32_t pow2BytesPerRead,
                                int32_t* status) {
+  auto spi = spiHandles->Get(handle);
+  if (!spi) {
+    *status = HAL_HANDLE_ERROR;
+    return;
+  }
   std::scoped_lock lock(spiAutoMutex);
+
   // FPGA only has one auto SPI engine
-  if (port != spiAutoPort) {
+  if (spi->port != spiAutoPort) {
     *status = INCOMPATIBLE_STATE;
     return;
   }

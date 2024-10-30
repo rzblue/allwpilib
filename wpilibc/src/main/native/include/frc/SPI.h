@@ -357,7 +357,8 @@ class SPI {
   double GetAccumulatorIntegratedAverage() const;
 
  protected:
-  hal::Handle<HAL_SPIPort, HAL_CloseSPI, HAL_SPI_kInvalid> m_port;
+  HAL_SPIPort m_port;
+  hal::Handle<HAL_SPIHandle, HAL_CloseSPI> m_handle;
   HAL_SPIMode m_mode = HAL_SPIMode::HAL_SPI_kMode0;
 
  private:

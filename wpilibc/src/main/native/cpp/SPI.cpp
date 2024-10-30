@@ -157,9 +157,9 @@ void SPI::Accumulator::Update() {
 
 SPI::SPI(Port port) : m_port(static_cast<HAL_SPIPort>(port)) {
   int32_t status = 0;
-  HAL_InitializeSPI(m_port, &status);
-  HAL_SetSPIMode(m_port, m_mode);
+  m_handle = HAL_InitializeSPI(m_port, &status);
   FRC_CheckErrorStatus(status, "Port {}", static_cast<int>(m_port));
+  HAL_SetSPIMode(m_port, m_mode);
 
   HAL_Report(HALUsageReporting::kResourceType_SPI,
              static_cast<uint8_t>(port) + 1);
@@ -203,7 +203,7 @@ int SPI::Read(bool initiate, uint8_t* dataReceived, int size) {
   if (initiate) {
     wpi::SmallVector<uint8_t, 32> dataToSend;
     dataToSend.resize(size);
-    retVal = HAL_TransactionSPI(m_port, dataToSend.data(), dataReceived, size);
+    retVal = HAL_TransactionSPI(m_handle, dataToSend.data(), dataReceived, size);
   } else {
     retVal = HAL_ReadSPI(m_port, dataReceived, size);
   }
