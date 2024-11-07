@@ -45,6 +45,9 @@ template <typename... T>
 inline void println(fmt::format_string<T...> fmt, T&&... args) {
   try {
     fmt::println(fmt, std::forward<T>(args)...);
+#ifdef _WIN32
+    std::fflush(stdout);
+#endif
   } catch (const std::system_error&) {
   }
 }
@@ -57,6 +60,9 @@ inline void println(std::FILE* f, fmt::format_string<T...> fmt, T&&... args) {
   try {
     fmt::println(f, fmt, std::forward<T>(args)...);
   } catch (const std::system_error&) {
+#ifdef _WIN32
+    std::fflush(stdout);
+#endif
   }
 }
 
