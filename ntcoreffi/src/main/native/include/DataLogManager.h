@@ -83,7 +83,7 @@ class DataLogManager final {
   /**
    * Enable or disable logging of NetworkTables data. Note that unlike the
    * network interface for NetworkTables, this will capture every value change.
-   * Defaults to enabled.
+   * Defaults to enabled. Starts the data log manager if not already started.
    *
    * @param enabled true to enable, false to disable
    */
@@ -91,6 +91,8 @@ class DataLogManager final {
 
   /**
    * Enable or disable logging of the console output. Defaults to enabled.
+   * Starts the data log manager if not already started.
+   *
    * @param enabled  true to enable, false to disable
    */
   static void LogConsoleOutput(bool enabled);
@@ -118,7 +120,8 @@ struct WPI_DataLog;
  * @param period time between automatic flushes to disk, in seconds;
  *               this is a time/storage tradeoff
  */
-void DLM_Start(const struct WPI_String* dir, const struct WPI_String* filename, double period);
+void DLM_Start(const struct WPI_String* dir, const struct WPI_String* filename,
+               double period);
 
 /**
  * Stop data log manager.
@@ -151,17 +154,18 @@ void DLM_GetLogDir(struct WPI_String* value);
 /**
  * Enable or disable logging of NetworkTables data. Note that unlike the
  * network interface for NetworkTables, this will capture every value change.
- * Defaults to enabled.
+ * Defaults to enabled. Starts the data log manager if not already started.
  *
  * @param enabled true to enable, false to disable
  */
 void DLM_LogNetworkTables(int enabled);
 
-
-  /**
-   * Enable or disable logging of the console output. Defaults to enabled.
-   * @param enabled  true to enable, false to disable
-   */
+/**
+ * Enable or disable logging of the console output. Defaults to enabled. Starts
+ * the data log manager if not already started.
+ *
+ * @param enabled  true to enable, false to disable
+ */
 void DLM_LogConsoleOutput(int enabled);
 
 /**

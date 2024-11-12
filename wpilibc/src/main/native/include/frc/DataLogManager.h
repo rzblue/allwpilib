@@ -80,7 +80,7 @@ class DataLogManager final {
   /**
    * Enable or disable logging of NetworkTables data. Note that unlike the
    * network interface for NetworkTables, this will capture every value change.
-   * Defaults to enabled.
+   * Defaults to enabled. Starts the data log manager if not already started.
    *
    * @param enabled true to enable, false to disable
    */
@@ -88,6 +88,7 @@ class DataLogManager final {
 
   /**
    * Enable or disable logging of the console output. Defaults to enabled.
+   * Starts the data log manager if not already started.
    * @param enabled  true to enable, false to disable
    */
   static void LogConsoleOutput(bool enabled);
