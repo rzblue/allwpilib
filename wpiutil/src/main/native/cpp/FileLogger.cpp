@@ -29,6 +29,8 @@ FileLogger::FileLogger(std::string_view file,
       m_inotifyHandle{inotify_init()},
       m_inotifyWatchHandle{
           inotify_add_watch(m_inotifyHandle, file.data(), IN_MODIFY)},
+          // capturing this is not safe here...
+          // also need to think harder about if synchronization is needed here
       m_thread{[=, this] {
         char buf[8000];
         char eventBuf[sizeof(struct inotify_event) + NAME_MAX + 1];
@@ -87,18 +89,16 @@ FileLogger::~FileLogger() {
 
 std::function<void(std::string_view)> FileLogger::Buffer(
     std::function<void(std::string_view)> callback) {
-  return [callback,
-          buf = wpi::SmallVector<char, 64>{}](std::string_view data) mutable {
-    buf.append(data.begin(), data.end());
-    if (!wpi::contains({data.data(), data.size()}, "\n")) {
-      return;
+  return [callback, buf = wpi::SmallVector<char, 64>{}](
+             std::string_view newData) mutable {
+    size_t newlineLocation = newData.rfind("\n");
+    if (newlineLocation != std::string_view::npos) {
+      buf.append(newData.begin(), newData.begin() + newlineLocation);
+      callback({buf.data(), buf.size()});
+      buf.clear();
+      newData = newData.substr(newlineLocation + 1);
     }
-    auto [wholeData, extra] = wpi::rsplit({buf.data(), buf.size()}, "\n");
-    std::string leftover{extra};
-
-    callback(wholeData);
-    buf.clear();
-    buf.append(leftover.begin(), leftover.end());
+    buf.append(newData.begin(), newData.end());
   };
 }
 }  // namespace wpi
