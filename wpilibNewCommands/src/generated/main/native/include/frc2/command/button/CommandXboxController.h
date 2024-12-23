@@ -19,6 +19,11 @@ namespace frc2 {
  * @see frc::XboxController
  */
 class CommandXboxController : public CommandGenericHID {
+
+
+
+
+  
  public:
   /**
    * Construct an instance of a controller.
