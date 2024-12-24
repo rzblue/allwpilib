@@ -15,6 +15,8 @@ cc_library(
             "-Wno-sign-compare",
             "-Wno-type-limits",
         ],
+
+
         "@bazel_tools//src/conditions:windows": [
             "/wd4005",
             "/wd4018",
@@ -22,6 +24,8 @@ cc_library(
             "/wd4267",
             "/wd4996",
         ],
+
+    
         "@rules_bzlmodrio_toolchains//constraints/combined:is_linux": [
             "-Wno-format-nonliteral",
             "-Wno-maybe-uninitialized",
@@ -29,7 +33,7 @@ cc_library(
             "-Wno-type-limits",
         ],
     }),
-    includes = ["src/main/native/thirdparty/apriltag/include/common"],
+    includes =  ["src/main/native/thirdparty/apriltag/include/common"],
     strip_include_prefix = "src/main/native/thirdparty/apriltag/include",
     visibility = ["//visibility:public"],
 )
