@@ -23,10 +23,9 @@ jobs:
           # token: ${{ secrets.COMMENT_COMMAND_PAT_TOKEN }}
       - name: Checkout PR
         run: |
-          gh pr checkout $NUMBER
+          gh pr checkout ${{ github.event.issue.number }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NUMBER: ${{ github.event.issue.number }}
       - name: Fetch patches
         id: fetch-patches
         # Fails workflow if artifact not found
@@ -34,6 +33,8 @@ jobs:
         with:
           workflow: lint-format.yml
           pr: ${{ github.event.issue.number }}
+          name: "fixes$"
+          name_is_regexp: true
           workflow_conclusion: "failure" # Format failure -> patches available
           if_no_artifact_found: warn
           allow_forks: false
@@ -43,7 +44,6 @@ jobs:
           echo "found-artifacts=${{ steps.fetch-patches.outputs.artifacts &&
             contains(fromJSON(steps.fetch-patches.outputs.artifacts).*.name, 'javaformat fixes') &&
             contains(fromJSON(steps.fetch-patches.outputs.artifacts).*.name, 'wpiformat fixes') }}" >> "$GITHUB_OUTPUT"
-      - run: echo ${{ toJSON(steps.check-found-artifacts.outputs.found-artifacts) }}
       - name: Apply patch
         if: steps.check-found-artifacts.outputs.found-artifacts
         run: |
@@ -79,10 +79,9 @@ jobs:
           # token: ${{ secrets.COMMENT_COMMAND_PAT_TOKEN }}
       - name: Checkout PR
         run: |
-          gh pr checkout $NUMBER
+          gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # "${{ secrets.COMMENT_COMMAND_PAT_TOKEN }}"
-          NUMBER: ${{ github.event.issue.number }}
       - name: Fetch patches
         id: fetch-patches
         uses: dawidd6/action-download-artifact@v7
