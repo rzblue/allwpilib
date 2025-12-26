@@ -102,11 +102,9 @@ void ServerClient4Base::ClientSubscribe(int subuid,
                                              options);
   }
 
-  // update periodic sender (if not local)
-  if (!m_local) {
-    m_periodMs = net::UpdatePeriodCalc(m_periodMs, sub->GetPeriodMs());
-    m_setPeriodic(m_periodMs);
-  }
+  // update periodic sender
+  m_periodMs = net::UpdatePeriodCalc(m_periodMs, sub->GetPeriodMs());
+  m_setPeriodic(m_periodMs);
 
   // see if this immediately subscribes to any topics
   // for transmit efficiency, we want to batch announcements and values, so
@@ -182,11 +180,9 @@ void ServerClient4Base::ClientUnsubscribe(int subuid) {
   m_subscribers.erase(subIt);
 
   // loop over all subscribers to update period
-  if (!m_local) {
-    m_periodMs = net::CalculatePeriod(
-        m_subscribers, [](auto& x) { return x.getSecond()->GetPeriodMs(); });
-    m_setPeriodic(m_periodMs);
-  }
+  m_periodMs = net::CalculatePeriod(
+      m_subscribers, [](auto& x) { return x.getSecond()->GetPeriodMs(); });
+  m_setPeriodic(m_periodMs);
 }
 
 void ServerClient4Base::ClientSetValue(int pubuid, const Value& value) {
