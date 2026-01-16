@@ -35,6 +35,16 @@ enum LogLevel {
  * The Logger class provides a flexible logging mechanism that allows
  * custom log handling through a callback function. Log messages can be
  * filtered by minimum log level.
+ *
+ * Example:
+ * @code
+ * Logger logger{[](unsigned int level, const char* file, unsigned int line,
+ *                  const char* msg) {
+ *   std::cout << msg << std::endl;
+ * }};
+ * WPI_INFO(logger, "Application started");
+ * WPI_ERROR(logger, "Connection failed: {}", error);
+ * @endcode
  */
 class Logger {
  public:
@@ -98,8 +108,11 @@ class Logger {
   /**
    * Logs a message.
    *
-   * This is the core logging function that calls the registered logger
+   * This is the main logging function that calls the registered logger
    * function if the level meets the minimum threshold.
+   *
+   * @note Users should generally use the log macros (WPI_ERROR, WPI_INFO, etc.)
+   *       instead of calling this directly.
    *
    * @param level Log level
    * @param file Source file name
@@ -110,12 +123,15 @@ class Logger {
              const char* msg);
 
   /**
-   * Logs a formatted message using fmt format string.
+   * Logs a formatted message using a format string.
+   *
+   * @note Users should generally use the log macros (WPI_ERROR, WPI_INFO, etc.)
+   *       instead of calling this directly.
    *
    * @param level Log level
    * @param file Source file name
    * @param line Line number in source file
-   * @param format Format string (fmt syntax)
+   * @param format Format string
    * @param args Format arguments
    */
   void LogV(unsigned int level, const char* file, unsigned int line,
@@ -166,15 +182,6 @@ class Logger {
  * This macro logs a message if the logger has a function set and the level
  * meets the minimum threshold. The file name and line number are
  * automatically captured.
- *
- * Example:
- * @code
- * Logger logger{[](unsigned int level, const char* file, unsigned int line,
- *                  const char* msg) {
- *   std::cout << msg << std::endl;
- * }};
- * WPI_LOG(logger, WPI_LOG_INFO, "Value is {}", 42);
- * @endcode
  *
  * @param logger_inst Logger instance
  * @param level Log level
