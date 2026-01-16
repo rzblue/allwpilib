@@ -138,7 +138,7 @@ class Logger {
             fmt::string_view format, fmt::format_args args);
 
   /**
-   * Logs a formatted message using fmt format string.
+   * Logs a formatted message using a format string.
    *
    * This template function provides type-safe formatted logging using
    * the fmt library syntax.
@@ -147,7 +147,7 @@ class Logger {
    * @param level Log level
    * @param file Source file name
    * @param line Line number in source file
-   * @param format Format string (fmt syntax)
+   * @param format Format string
    * @param args Format arguments
    */
   template <typename... Args>
@@ -185,7 +185,7 @@ class Logger {
  *
  * @param logger_inst Logger instance
  * @param level Log level
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_LOG(logger_inst, level, format, ...)                            \
@@ -198,7 +198,7 @@ class Logger {
  * Log an error message.
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_ERROR(inst, format, ...) \
@@ -208,7 +208,7 @@ class Logger {
  * Log a warning message.
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_WARNING(inst, format, ...) \
@@ -218,7 +218,7 @@ class Logger {
  * Log an informational message.
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_INFO(inst, format, ...) \
@@ -228,7 +228,7 @@ class Logger {
  * Log a debug message.
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_DEBUG(inst, format, ...) \
@@ -238,7 +238,7 @@ class Logger {
  * Log a verbose debug message (level 1).
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_DEBUG1(inst, format, ...) \
@@ -248,7 +248,7 @@ class Logger {
  * Log a verbose debug message (level 2).
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_DEBUG2(inst, format, ...) \
@@ -258,7 +258,7 @@ class Logger {
  * Log a verbose debug message (level 3).
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_DEBUG3(inst, format, ...) \
@@ -268,7 +268,7 @@ class Logger {
  * Log a verbose debug message (level 4).
  *
  * @param inst Logger instance
- * @param format Format string (fmt syntax)
+ * @param format Format string
  * @param ... Format arguments (optional)
  */
 #define WPI_DEBUG4(inst, format, ...) \
